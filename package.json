@@ -1,0 +1,45 @@
+{
+    "name": "pandocciter",
+    "displayName": "Pandoc Citer",
+    "description": "Autocomplete bibtex citations for markdown/pandoc",
+    "version": "0.0.1",
+    "publisher": "notZaki",
+    "license": "MIT",
+    "engines": {
+        "vscode": "^1.23.0"
+    },
+    "icon": "icon.png",
+    "homepage": "https://github.com/notZaki/PandocCiter",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/notZaki/PandocCiter"
+    },
+    "bugs": {
+        "url": "https://github.com/notZaki/PandocCiter/issues"
+    },
+    "categories": [
+        "Other"
+    ],
+    "activationEvents": [
+        "onLanguage:markdown"
+    ],
+    "main": "./out/extension",
+    "scripts": {
+        "vscode:prepublish": "npm run compile",
+        "compile": "tsc -p ./",
+        "watch": "tsc -watch -p ./",
+        "postinstall": "node ./node_modules/vscode/bin/install",
+        "test": "npm run compile && node ./node_modules/vscode/bin/test"
+    },
+    "dependencies": {
+        "chokidar": "^2.0.3"
+    },
+    "devDependencies": {
+        "typescript": "^2.6.1",
+        "vscode": "^1.1.6",
+        "tslint": "^5.8.0",
+        "@types/chokidar": "^1.6.0",
+        "@types/node": "^7.0.43",
+        "@types/mocha": "^2.2.42"
+    }
+}
