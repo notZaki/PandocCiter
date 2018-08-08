@@ -50,28 +50,36 @@ export class Manager {
     findBib() : void {
         const bibRegex = /^bibliography:\s* \[(.*)\]/m;
         const activeText = vscode.window.activeTextEditor!.document.getText();
-        const bibresult = activeText.match(bibRegex);
+        let bibresult = activeText.match(bibRegex);
         if (bibresult) {
             const bibFiles = bibresult[1].split(',').map(item => item.trim());
             for (let i in bibFiles) {
-                let bibFile = path.resolve(path.dirname(vscode.window.activeTextEditor!.document.fileName), bibFiles[i]);
+                let bibFile = bibFiles[i];
+                if (!path.isAbsolute(bibFile)) { 
+                    bibFile = path.resolve(path.dirname(vscode.window.activeTextEditor!.document.fileName), bibFile);
+                }
                 if (this.extension.showLog) {console.log('Looking for .bib file: ' + bibFile);}
                 this.addBibToWatcher(bibFile);
             }
         }
+        const configuration = vscode.workspace.getConfiguration('PandocCiter');
+        if (configuration.get('RootFile') !== "") {
+            var curInput = path.join(vscode.workspace.rootPath, configuration.get('RootFile'));
+            var rootText = fs.readFileSync(curInput,'utf8');
+            bibresult = rootText.match(bibRegex);
+            if (bibresult) {
+                const bibFiles = bibresult[1].split(',').map(item => item.trim());
+                for (let i in bibFiles) {
+                    let bibFile = bibFiles[i];
+                    if (!path.isAbsolute(bibFile)) { 
+                        bibFile = path.resolve(vscode.workspace.rootPath, bibFile);
+                    }
+                    if (this.extension.showLog) {console.log('Looking for .bib file: ' + bibFile);}
+                    this.addBibToWatcher(bibFile);
+                }
+            }
+        }
         return;
-    }
-
-    get rootDir() {
-        return path.dirname(this.rootFile);
-    }
-
-    get rootFile() {
-        return this.rootFiles[this.workspace];
-    }
-
-    set rootFile(root: string) {
-        this.rootFiles[this.workspace] = root;
     }
 
     addBibToWatcher(bib: string) {
@@ -79,7 +87,7 @@ export class Manager {
         if (path.isAbsolute(bib)) {
             bibPath = bib;
         } else {
-            bibPath = path.resolve(path.join(this.rootDir, bib));
+            bibPath = path.resolve(path.dirname(vscode.window.activeTextEditor!.document.fileName), bib);
         }
         if (path.extname(bibPath) === '') {
             bibPath += '.bib';

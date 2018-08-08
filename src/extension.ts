@@ -23,7 +23,7 @@ export function activate(context: vscode.ExtensionContext) {
     extension.manager.findBib();
     context.subscriptions.push(vscode.languages.registerCompletionItemProvider(
         {scheme: 'file', language: 'markdown'}, 
-        extension.completer, '@', '{', '('));
+        extension.completer, '@'));
 }
 
 export class Extension {

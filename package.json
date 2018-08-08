@@ -2,7 +2,7 @@
     "name": "pandocciter",
     "displayName": "Pandoc Citer",
     "description": "Autocomplete bibtex citations for markdown/pandoc",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "publisher": "notZaki",
     "license": "MIT",
     "engines": {
@@ -24,6 +24,27 @@
         "onLanguage:markdown"
     ],
     "main": "./out/extension",
+    "contributes": {
+        "configuration": {
+            "title": "PandocCiter configuration",
+            "properties": {
+                "PandocCiter.ViewType": {
+                    "type": "string",
+                    "enum": [
+                        "inline",
+                        "browser"
+                    ],
+                    "default": "inline",
+                    "description": "How citation completions are shown"
+                },
+                "PandocCiter.RootFile": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Main file containing YAML for bibliography"
+                }
+            }
+        }
+    },
     "scripts": {
         "vscode:prepublish": "npm run compile",
         "compile": "tsc -p ./",
