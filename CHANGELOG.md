@@ -1,5 +1,9 @@
 # Change Log
 
+## [0.0.3]
+
+- 2018-08-28 | Extension log can now be viewed in the output panel. Fixed relative path in RootFile being incorrectly resolved relative to the Workplace Directory instead of the RootFile's directory.
+
 ## [0.0.2]
 - 2018-08-08 | Added configuration for ViewType and RootFile
 

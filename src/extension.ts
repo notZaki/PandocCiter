@@ -24,19 +24,29 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(vscode.languages.registerCompletionItemProvider(
         {scheme: 'file', language: 'markdown'}, 
         extension.completer, '@'));
+
+    
 }
 
 export class Extension {
     manager: Manager;
     completer: Completer;
     showLog: Boolean;
+    logPanel: vscode.OutputChannel
 
     constructor() {
         this.manager = new Manager(this);
         this.completer = new Completer(this);
-        this.showLog = true;
-        console.log(`PandocCiter is now activated`);
+        this.logPanel = vscode.window.createOutputChannel('PandocCiter')
+        this.logPanel.append(`PandocCiter is now activated`);
     }
+    
+    log(msg: string) {
+        if (vscode.workspace.getConfiguration('PandocCiter').get('ShowLog')) {
+            this.logPanel.append(`${msg}\n`)
+        }
+    }
+
 }
 
 

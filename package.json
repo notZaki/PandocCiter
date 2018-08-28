@@ -2,7 +2,7 @@
     "name": "pandocciter",
     "displayName": "Pandoc Citer",
     "description": "Autocomplete bibtex citations for markdown/pandoc",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "publisher": "notZaki",
     "license": "MIT",
     "engines": {
@@ -41,6 +41,11 @@
                     "type": "string",
                     "default": "",
                     "description": "Main file containing YAML for bibliography"
+                },
+                "PandocCiter.ShowLog": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Should log be shown in Output panel"
                 }
             }
         }

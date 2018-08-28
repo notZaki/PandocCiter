@@ -135,7 +135,7 @@ export class Citation {
     }
 
     parseBibFile(bibPath: string) {
-        console.log(`Parsing .bib entries from ${bibPath}`);
+        this.extension.log(`Parsing .bib entries from ${bibPath}`);
         const items: CitationRecord[] = [];
         const content = fs.readFileSync(bibPath, 'utf-8');
         const contentNoNewLine = content.replace(/[\r\n]/g, ' ');
@@ -160,7 +160,7 @@ export class Citation {
                     };
                 } else {
                     // TODO we could consider adding a diagnostic for this case so the issue appears in the Problems list
-                    console.log(`Warning - following .bib entry in ${bibPath} has no cite key:\n${itemString}`);
+                    this.extension.logPanel.append(`Warning - following .bib entry in ${bibPath} has no cite key:\n${itemString}`);
                 }
             }
             prevResult = result;
@@ -168,12 +168,12 @@ export class Citation {
                 result = itemReg.exec(contentNoNewLine);
             }
         }
-        console.log(`Parsed ${items.length} .bib entries from ${bibPath}.`);
+        this.extension.log(`Parsed ${items.length} .bib entries from ${bibPath}.`);
         this.citationInBib[bibPath] = items;
     }
 
     forgetParsedBibItems(bibPath: string) {
-        console.log(`Forgetting parsed bib entries for ${bibPath}`);
+        this.extension.logPanel.append(`Forgetting parsed bib entries for ${bibPath}`);
         delete this.citationInBib[bibPath];
     }
 

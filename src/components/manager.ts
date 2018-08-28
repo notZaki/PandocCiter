@@ -33,18 +33,12 @@ import {Extension} from '../extension';
 
 export class Manager {
     extension: Extension;
-    rootFiles: object;
-    workspace: string;
-    texFileTree: { [id: string]: Set<string> } = {};
-    fileWatcher: chokidar.FSWatcher;
     bibWatcher: chokidar.FSWatcher;
     watched: string[];
 
     constructor(extension: Extension) {
         this.extension = extension;
         this.watched   = [];
-        this.rootFiles = {};
-        this.workspace = '';
     }
 
     findBib() : void {
@@ -58,7 +52,7 @@ export class Manager {
                 if (!path.isAbsolute(bibFile)) { 
                     bibFile = path.resolve(path.dirname(vscode.window.activeTextEditor!.document.fileName), bibFile);
                 }
-                if (this.extension.showLog) {console.log('Looking for .bib file: ' + bibFile);}
+                this.extension.log('Looking for .bib file: ' + bibFile);
                 this.addBibToWatcher(bibFile);
             }
         }
@@ -70,11 +64,11 @@ export class Manager {
             if (bibresult) {
                 const bibFiles = bibresult[1].split(',').map(item => item.trim());
                 for (let i in bibFiles) {
-                    let bibFile = bibFiles[i];
+                    let bibFile = path.join(path.dirname(configuration.get('RootFile')), bibFiles[i]);
                     if (!path.isAbsolute(bibFile)) { 
                         bibFile = path.resolve(vscode.workspace.rootPath, bibFile);
                     }
-                    if (this.extension.showLog) {console.log('Looking for .bib file: ' + bibFile);}
+                    this.extension.log('Looking for .bib file: ' + bibFile);
                     this.addBibToWatcher(bibFile);
                 }
             }
@@ -96,28 +90,28 @@ export class Manager {
             bibPath += '.bib';
         }
         if (fs.existsSync(bibPath)) {
-            if (this.extension.showLog) {console.log(`Found .bib file ${bibPath}`);}
+            this.extension.log(`Found .bib file ${bibPath}`);
             if (this.bibWatcher === undefined) {
-                if (this.extension.showLog) {console.log(`Creating file watcher for .bib files.`);}
+                this.extension.log(`Creating file watcher for .bib files.`);
                 this.bibWatcher = chokidar.watch(bibPath);
                 this.bibWatcher.on('change', (filePath: string) => {
-                    if (this.extension.showLog) {console.log(`Bib file watcher - responding to change in ${filePath}`);}
+                    this.extension.log(`Bib file watcher - responding to change in ${filePath}`);
                     this.extension.completer.citation.parseBibFile(filePath);
                 });
                 this.bibWatcher.on('unlink', (filePath: string) => {
-                    if (this.extension.showLog) {console.log(`Bib file watcher: ${filePath} deleted.`);}
+                    this.extension.log(`Bib file watcher: ${filePath} deleted.`);
                     this.extension.completer.citation.forgetParsedBibItems(filePath);
                     this.bibWatcher.unwatch(filePath);
                     this.watched.splice(this.watched.indexOf(filePath), 1);
                 });
                 this.extension.completer.citation.parseBibFile(bibPath);
             } else if (this.watched.indexOf(bibPath) < 0) {
-                if (this.extension.showLog) {console.log(`Adding .bib file ${bibPath} to bib file watcher.`);}
+                this.extension.log(`Adding .bib file ${bibPath} to bib file watcher.`);
                 this.bibWatcher.add(bibPath);
                 this.watched.push(bibPath);
                 this.extension.completer.citation.parseBibFile(bibPath);
             } else {
-                if (this.extension.showLog) {console.log(`.bib file ${bibPath} is already being watched.`);}
+                this.extension.log(`.bib file ${bibPath} is already being watched.`);
             }
         }
     }
