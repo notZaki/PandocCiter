@@ -16,8 +16,8 @@ This extension provides autocompletion of citations stored in a bibtex file, for
     ```
     bibliography: [path/to/.bib]
     ```
-    - The path/to/.bib should be enclosed by square brackets, and could be either a relative or absolute path
-    - Multiple bib files can be included if separated by comma, e.g. `[path/to/refsA.bib, path/to/refsB.bib]
+    + The path/to/.bib should be enclosed by square brackets, and could be either a relative or absolute path
+    + Multiple bib files can be included if separated by comma, e.g. `[path/to/refsA.bib, path/to/refsB.bib]`
 
 ### Configuration
 
@@ -25,7 +25,7 @@ This extension provides autocompletion of citations stored in a bibtex file, for
     + Type: String, either "inline" (default) or "browser"
     + Function: Changes how the suggested citations are shown
 - `PandocCiter.RootFile`
-    + Type: String, relative path to markdown file
+    + Type: String, path to markdown file
     + Function: This is useful if there are multiple markdown files with one external master file containing the YAML header with the `bibliography: [path/to/bib]` entry. This avoids having to insert the bibliography YAML header into each individual file. 
 - `PandocCiter.ShowLog`
     + Type: Boolean

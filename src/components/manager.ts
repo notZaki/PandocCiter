@@ -58,13 +58,17 @@ export class Manager {
         }
         const configuration = vscode.workspace.getConfiguration('PandocCiter');
         if (configuration.get('RootFile') !== "") {
-            var curInput = path.join(vscode.workspace.rootPath, configuration.get('RootFile'));
+            // var curInput = path.join(vscode.workspace.rootPath, configuration.get('RootFile'));
+            let curInput = path.join(configuration.get('RootFile'));
+            if (!path.isAbsolute(curInput)) { 
+                curInput = path.join(vscode.workspace.rootPath, configuration.get('RootFile'));
+            }
             var rootText = fs.readFileSync(curInput,'utf8');
             bibresult = rootText.match(bibRegex);
             if (bibresult) {
                 const bibFiles = bibresult[1].split(',').map(item => item.trim());
                 for (let i in bibFiles) {
-                    let bibFile = path.join(path.dirname(configuration.get('RootFile')), bibFiles[i]);
+                    let bibFile = path.join(path.dirname(curInput), bibFiles[i]);
                     if (!path.isAbsolute(bibFile)) { 
                         bibFile = path.resolve(vscode.workspace.rootPath, bibFile);
                     }
