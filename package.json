@@ -26,7 +26,7 @@
     "main": "./out/extension",
     "contributes": {
         "configuration": {
-            "title": "PandocCiter configuration",
+            "title": "PandocCiter",
             "properties": {
                 "PandocCiter.ViewType": {
                     "type": "string",
