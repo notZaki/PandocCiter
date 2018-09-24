@@ -33,4 +33,5 @@ This extension provides autocompletion of citations stored in a bibtex file, for
 
 ## Acknowledgements
 
-- This extension is essentially a stripped down version of the [LaTeX-Workshop extension](https://github.com/James-Yu/LaTeX-Workshop) that has been adjusted for markdown/pandoc.  
+- This extension is essentially a stripped down version of the [LaTeX-Workshop extension](https://github.com/James-Yu/LaTeX-Workshop) that has been adjusted for markdown/pandoc
+    + The structure of the `src` directory was preserved, so that any updates/fixes here could also be ported to LaTex-Workshop, and vice versa

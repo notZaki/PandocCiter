@@ -1,8 +1,15 @@
 # Change Log
 
+## [0.0.5] - 2018-09-24
+
+- Enable `awaitWriteFinish` on file watcher. This might introduce a short delay before a modified .bib file is parsed, but it prevents .bib files from getting partially parsed when they are still being written to disk.
+- Adapted fix from: https://github.com/James-Yu/LaTeX-Workshop/pull/817
+    + Should improve bib parsing speed
+- Use newer versions of dependencies
+
 ## [0.0.4] - 2018-08-29
 
-- Output channel for the extension log should no longer be created if PandocCite.ShowLog config is false
+- Output channel for the extension log should no longer be created if PandocCiter.ShowLog config is false
 
 ## [0.0.3] - 2018-08-28
 

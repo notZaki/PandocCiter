@@ -97,7 +97,7 @@ export class Manager {
             this.extension.log(`Found .bib file ${bibPath}`);
             if (this.bibWatcher === undefined) {
                 this.extension.log(`Creating file watcher for .bib files.`);
-                this.bibWatcher = chokidar.watch(bibPath);
+                this.bibWatcher = chokidar.watch(bibPath, {awaitWriteFinish: true});
                 this.bibWatcher.on('change', (filePath: string) => {
                     this.extension.log(`Bib file watcher - responding to change in ${filePath}`);
                     this.extension.completer.citation.parseBibFile(filePath);
