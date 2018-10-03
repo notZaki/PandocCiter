@@ -2,7 +2,7 @@
     "name": "pandocciter",
     "displayName": "Pandoc Citer",
     "description": "Autocomplete bibtex citations for markdown/pandoc",
-    "version": "0.0.5",
+    "version": "0.0.6",
     "publisher": "notZaki",
     "license": "MIT",
     "engines": {
@@ -25,6 +25,15 @@
     ],
     "main": "./out/extension",
     "contributes": {
+        "grammars": [
+            {
+              "injectTo": [
+                "text.html.markdown"
+              ],
+              "scopeName": "pandoc-citation",
+              "path": "./syntaxes/citations.json"
+            }
+        ],
         "configuration": {
             "title": "PandocCiter",
             "properties": {

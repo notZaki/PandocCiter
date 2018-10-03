@@ -1,5 +1,9 @@
 # Change Log
 
+## [0.0.6] - 2018-10-03
+
+- Add "pandoc.citation" scope for references: https://github.com/notZaki/PandocCiter/issues/1
+
 ## [0.0.5] - 2018-09-24
 
 - Enable `awaitWriteFinish` on file watcher. This might introduce a short delay before a modified .bib file is parsed, but it prevents .bib files from getting partially parsed when they are still being written to disk.
