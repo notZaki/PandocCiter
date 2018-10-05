@@ -2,14 +2,9 @@
     "injectionSelector": "text.html.markdown",
     "patterns": [
         {
-            "name": "pandoc.citation.block",
-            "begin": "\\[@",
-            "end": "\\]"
-        },
-        {
-            "name": "pandoc.citation.inline",
-            "begin": "\\s@",
-            "end": "[\\s\\n]"
+            "name": "pandoc.citation",
+            "begin": "(?<=[\\s\\r\\n\\[])@",
+            "end": "(?=[\\s\\r\\n\\]])"
         }
     ],
     "scopeName": "pandoc-citation"

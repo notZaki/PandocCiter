@@ -1,5 +1,9 @@
 # Change Log
 
+## [0.0.7] - 2018-10-04
+
+- Consolidate the two citation scopes into a single scope
+
 ## [0.0.6] - 2018-10-03
 
 - Add "pandoc.citation" scope for references: https://github.com/notZaki/PandocCiter/issues/1
