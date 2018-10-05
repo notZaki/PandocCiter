@@ -1,5 +1,9 @@
 # Change Log
 
+## [0.0.8] - 2018-10-05
+
+- Recognize citation scope when a reference is at the beginning of a new line
+
 ## [0.0.7] - 2018-10-04
 
 - Consolidate the two citation scopes into a single scope
@@ -17,7 +21,7 @@
 
 ## [0.0.4] - 2018-08-29
 
-- Output channel for the extension log should no longer be created if PandocCiter.ShowLog config is false
+- Output channel for the extension log should no longer be created if `PandocCiter.ShowLog` config is false
 
 ## [0.0.3] - 2018-08-28
 

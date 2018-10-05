@@ -1,10 +1,10 @@
 {
-    "injectionSelector": "text.html.markdown",
+    "injectionSelector": "L:text.html.markdown",
     "patterns": [
         {
             "name": "pandoc.citation",
-            "begin": "(?<=[\\s\\r\\n\\[])@",
-            "end": "(?=[\\s\\r\\n\\]])"
+            "begin": "(?<=^|\\s|\\[)@",
+            "end": "(?=\\s|\\r|\\n|\\]|$)"
         }
     ],
     "scopeName": "pandoc-citation"
