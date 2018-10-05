@@ -1,5 +1,9 @@
 # Change Log
 
+## [0.0.9] - 2018-10-05
+
+- Remove disallowed punctuation from citation scope
+
 ## [0.0.8] - 2018-10-05
 
 - Recognize citation scope when a reference is at the beginning of a new line

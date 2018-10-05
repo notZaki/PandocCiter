@@ -3,8 +3,8 @@
     "patterns": [
         {
             "name": "pandoc.citation",
-            "begin": "(?<=^|\\s|\\[)@",
-            "end": "(?=\\s|\\r|\\n|\\]|$)"
+            "begin": "(?<=^|[\\s\\[])@",
+            "end": "(?=$|[\\s\\r\\n\\]{},~#%\\\\'\"=\\(\\)])"
         }
     ],
     "scopeName": "pandoc-citation"
