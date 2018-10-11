@@ -24,6 +24,9 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(vscode.languages.registerCompletionItemProvider(
         {scheme: 'file', language: 'markdown'}, 
         extension.completer, '@'));
+    context.subscriptions.push(vscode.languages.registerCompletionItemProvider(
+        {scheme: 'file', language: 'rmd'}, 
+        extension.completer, '@'));
 }
 
 export class Extension {

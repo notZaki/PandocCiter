@@ -2,7 +2,7 @@
     "name": "pandocciter",
     "displayName": "Pandoc Citer",
     "description": "Autocomplete bibtex citations for markdown/pandoc",
-    "version": "0.0.9",
+    "version": "0.1.0",
     "publisher": "notZaki",
     "license": "MIT",
     "engines": {
@@ -21,18 +21,20 @@
         "Other"
     ],
     "activationEvents": [
-        "onLanguage:markdown"
+        "onLanguage:markdown",
+        "onLanguage:rmd"
     ],
     "main": "./out/extension",
     "contributes": {
         "grammars": [
             {
-              "injectTo": [
-                "text.html.markdown"
-              ],
-              "scopeName": "pandoc-citation",
-              "path": "./syntaxes/citations.json"
-            }
+                "injectTo": [
+                  "text.html.markdown",
+                  "text.html.markdown.redcarpet"
+                ],
+                "scopeName": "pandoc-citation",
+                "path": "./syntaxes/citations.json"
+              }
         ],
         "configuration": {
             "title": "PandocCiter",

@@ -1,5 +1,11 @@
 # Change Log
 
+## [0.0.9] - 2018-10-10
+
+- Change `pandoc.citation` scope to `string.other.link.description.markdown.citation`
+    + Citations should now be automatically hi-lighted by most (all?) themes
+- Add support for R-Markdown documents
+
 ## [0.0.9] - 2018-10-05
 
 - Remove disallowed punctuation from citation scope
