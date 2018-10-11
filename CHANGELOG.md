@@ -1,6 +1,6 @@
 # Change Log
 
-## [0.1.1 & 0.1.2] - 2018-10-11
+## [0.1.3 & 0.1.2 & 0.1.1] - 2018-10-11
 
 - Fix citations not being highlighted when inside square brackets in vscode 1.28
 

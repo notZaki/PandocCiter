@@ -2,15 +2,26 @@
     "injectionSelector": "L:text.html.markdown",
     "patterns": [
         {
-            "name": "string.other.link.description.markdown.citation",
-            "begin": "(?<=^|[\\s])@",
-            "end": "(?=$|[\\s\\r\\n\\]{},~#%\\\\'\"=\\(\\)])"
+            "include": "#pandoc-citationA"
         },
         {
-            "name": "string.other.link.description.markdown.citation",
-            "begin": "\\[@",
-            "end": "\\]"
+            "include": "#pandoc-citationB"
         }
     ],
+    "repository": {
+        "pandoc-citationA":{
+            "match": "(?<=^|\\s|\\[)(@(.*?))(?=$|[\\s\\r\\n\\]{},~#%\\\\'\"=\\(\\)])",
+            "name": "string.other.link.description.markdown.citation"
+        },
+        "pandoc-citationB":{
+            "captures": {
+                "2": {
+                    "name": "string.other.link.description.markdown.citation"
+                }
+            },
+            "match": "(\\[)(@(.*?))(?=$|[\\s\\r\\n\\]{},~#%\\\\'\"=\\(\\)])",
+            "name": "meta.paragraph.markdown"
+        }
+    },
     "scopeName": "pandoc-citation"
 }
