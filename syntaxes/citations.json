@@ -2,7 +2,7 @@
     "injectionSelector": "L:text.html.markdown",
     "patterns": [
         {
-            "name": "pandoc.citation",
+            "name": "string.other.link.description.markdown.citation",
             "begin": "(?<=^|[\\s\\[])@",
             "end": "(?=$|[\\s\\r\\n\\]{},~#%\\\\'\"=\\(\\)])"
         }
