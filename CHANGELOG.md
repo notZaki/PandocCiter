@@ -1,6 +1,10 @@
 # Change Log
 
-## [0.0.9] - 2018-10-10
+## [0.1.1] - 2018-10-11
+
+- Fix citations not being highlighted when inside square brackets in vscode 1.28
+
+## [0.1.0] - 2018-10-10
 
 - Change `pandoc.citation` scope to `string.other.link.description.markdown.citation`
     + Citations should now be automatically hi-lighted by most (all?) themes

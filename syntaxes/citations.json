@@ -3,8 +3,13 @@
     "patterns": [
         {
             "name": "string.other.link.description.markdown.citation",
-            "begin": "(?<=^|[\\s\\[])@",
-            "end": "(?=$|[\\s\\r\\n\\]{},~#%\\\\'\"=\\(\\)])"
+            "begin": "(?<=^|[\\s])@",
+            "end": "(?=$|[\\s\\r\\n{},~#%\\\\'\"=\\(\\)])"
+        },
+        {
+            "name": "string.other.link.description.markdown.citation",
+            "begin": "\\[@",
+            "end": "\\]"
         }
     ],
     "scopeName": "pandoc-citation"
