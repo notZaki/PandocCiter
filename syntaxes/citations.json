@@ -4,7 +4,7 @@
         {
             "name": "string.other.link.description.markdown.citation",
             "begin": "(?<=^|[\\s])@",
-            "end": "(?=$|[\\s\\r\\n{},~#%\\\\'\"=\\(\\)])"
+            "end": "(?=$|[\\s\\r\\n\\]{},~#%\\\\'\"=\\(\\)])"
         },
         {
             "name": "string.other.link.description.markdown.citation",
