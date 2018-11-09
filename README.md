@@ -16,8 +16,8 @@ This extension provides autocompletion of citations stored in a bibtex file, for
     ```
     bibliography: [path/to/.bib]
     ```
-    + The path/to/.bib should be enclosed by square brackets, and could be either a relative or absolute path
-    + Multiple bib files can be included if separated by comma, e.g. `[path/to/refsA.bib, path/to/refsB.bib]`
+    - The path/to/.bib should be enclosed by square brackets, and could be either a relative or absolute path
+    - Multiple bib files can be included if separated by comma, e.g. `[path/to/refsA.bib, path/to/refsB.bib]`
 
 ### Configuration
 

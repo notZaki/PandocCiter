@@ -20,6 +20,12 @@ export function activate(context: vscode.ExtensionContext) {
         }
     }));
 
+    context.subscriptions.push(vscode.workspace.onDidSaveTextDocument(() => {
+        if (vscode.window.activeTextEditor) {
+            extension.manager.findBib();
+        }
+    }));
+
     extension.manager.findBib();
     context.subscriptions.push(vscode.languages.registerCompletionItemProvider(
         {scheme: 'file', language: 'markdown'}, 
