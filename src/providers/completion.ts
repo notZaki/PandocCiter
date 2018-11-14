@@ -59,7 +59,7 @@ export class Completer implements vscode.CompletionItemProvider {
     completion(line: string) : vscode.CompletionItem[] {
         let reg;
         let provider;
-        reg = /(?:^|[ ;\[])\@([^\]\s]*)/;
+        reg = /(?:^|[ ;\[-])\@([^\]\s]*)/;
         provider = this.citation;
             
         const result = line.match(reg);

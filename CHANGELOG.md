@@ -1,8 +1,12 @@
 # Change Log
 
+## [0.1.5] - 2018-11-14
+
+- Add support for `-@key` syntax
+
 ## [0.1.4] - 2018-11-09
 
-- Bib files will be searches on file save
+- Bib files will be searched on file save
     + Previously, the text document had to be closed/re-opened whenever `bibliography: [./path/to/refs]` was updated
 
 ## [0.1.3 & 0.1.2 & 0.1.1] - 2018-10-11

@@ -10,7 +10,7 @@
     ],
     "repository": {
         "pandoc-citationA":{
-            "match": "(?<=^|\\s|\\[)(@(.*?))(?=$|[\\s\\r\\n\\]{},~#%\\\\'\"=\\(\\)])",
+            "match": "(?<=^|\\s|\\[|-)(@(.*?))(?=$|[\\s\\r\\n\\]{},~#%\\\\'\"=\\(\\)])",
             "name": "string.other.link.description.markdown.citation"
         },
         "pandoc-citationB":{
@@ -19,7 +19,7 @@
                     "name": "string.other.link.description.markdown.citation"
                 }
             },
-            "match": "(\\[)(@(.*?))(?=$|[\\s\\r\\n\\]{},~#%\\\\'\"=\\(\\)])",
+            "match": "(\\[)((-)*@(.*?))(?=$|[\\s\\r\\n\\]{},~#%\\\\'\"=\\(\\)])",
             "name": "meta.paragraph.markdown"
         }
     },

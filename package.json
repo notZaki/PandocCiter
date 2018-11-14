@@ -2,7 +2,7 @@
     "name": "pandocciter",
     "displayName": "Pandoc Citer",
     "description": "Autocomplete bibtex citations for markdown/pandoc",
-    "version": "0.1.4",
+    "version": "0.1.5",
     "publisher": "notZaki",
     "license": "MIT",
     "engines": {
