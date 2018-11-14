@@ -1,8 +1,10 @@
 # Change Log
 
-## [0.2.0] - 2018-11-14
+## [0.2.0 & 0.3.0] - 2018-11-14
 
-- Add support for `-@key` syntax
+- [0.3.0] Add configuration `PandocCiter.DefaultBib` and `PandocCiter.UseDefaultBib`
+    + `PandocCiter.DefaultBib` should be an absolute path to a bib file. This file will always be loaded in any markdown document without requiring a YAML entry.
+- [0.2.0] Add support for `-@key` syntax
 
 ## [0.1.4] - 2018-11-09
 

@@ -58,10 +58,15 @@
                     "default": false,
                     "description": "Should log be shown in Output panel"
                 },
-                "PandocCiter.DefaultLibrary": {
+                "PandocCiter.DefaultBib": {
                     "type": "string",
                     "default": "",
                     "description": "Path to default bib file"
+                },
+                "PandocCiter.UseDefaultBib": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Whether to use the Default Bib"
                 }
             }
         }

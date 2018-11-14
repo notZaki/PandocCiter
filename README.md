@@ -27,8 +27,14 @@ This extension provides autocompletion of citations stored in a bibtex file, for
 - `PandocCiter.RootFile`
     + Type: String, path to markdown file
     + Function: This is useful if there are multiple markdown files with one external master file containing the YAML header with the `bibliography: [path/to/bib]` entry. This avoids having to insert the bibliography YAML header into each individual file. 
+- `PandocCiter.DefaultBib`
+    + Type: String, absolute path to bib file
+    + Function: This is useful if there is a default bib file that is preferred for all projects. This bib file will be loaded regardless of whether or not a YAML entry is included.
+- `PandocCiter.UseDefaultBib`
+    + Type: Boolean, default is `True`
+    + Function: This should be a project-specific setting. It is useful when a DefaultBib is defined but you don't want it to be used for a specific project.
 - `PandocCiter.ShowLog`
-    + Type: Boolean
+    + Type: Boolean, default is `False`
     + Function: This will show a log in the Output panel, useful for answering questions like "Why isn't the extension finding my bib file?". The Output panel can be accessed via `VSCode Top Menubar -> View -> Output` which will open a panel at the bottom. Select `PandocCiter` from the drop down list, and the extension's log should show up.
 
 ## Acknowledgements

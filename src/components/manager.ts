@@ -77,8 +77,8 @@ export class Manager {
                 }
             }
         }
-        if (configuration.get('DefaultLibrary') !== "") {
-            let bibFile = path.join(configuration.get('DefaultLibrary'));
+        if (configuration.get('UseDefaultBib') && (configuration.get('DefaultBib') !== "")) {
+            let bibFile = path.join(configuration.get('DefaultBib'));
             this.extension.log('Looking for .bib file: ' + bibFile);
             this.addBibToWatcher(bibFile);
         }
