@@ -77,6 +77,11 @@ export class Manager {
                 }
             }
         }
+        if (configuration.get('DefaultLibrary') !== "") {
+            let bibFile = path.join(configuration.get('DefaultLibrary'));
+            this.extension.log('Looking for .bib file: ' + bibFile);
+            this.addBibToWatcher(bibFile);
+        }
         return;
     }
 
