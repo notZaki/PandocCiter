@@ -1,6 +1,6 @@
 # Change Log
 
-## [0.1.5] - 2018-11-14
+## [0.2.0] - 2018-11-14
 
 - Add support for `-@key` syntax
 
