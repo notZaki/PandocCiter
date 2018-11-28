@@ -1,5 +1,9 @@
 # Change Log
 
+## [0.3.1] - 2018-11-28
+
+- Updated vscode module to avoid [potential security issue](https://code.visualstudio.com/blogs/2018/11/26/event-stream) with the event-stream package.
+
 ## [0.2.0 & 0.3.0] - 2018-11-14
 
 - [0.3.0] Add configuration `PandocCiter.DefaultBib` and `PandocCiter.UseDefaultBib`
