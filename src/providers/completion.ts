@@ -40,8 +40,8 @@ export class Completer implements vscode.CompletionItemProvider {
 
     provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, _token: vscode.CancellationToken) : Promise<vscode.CompletionItem[]> {
         return new Promise((resolve, _reject) => {
-            const line = document.lineAt(position.line).text.substr(0, position.character);
-            const suggestions = this.completion(line);
+            const line = document.lineAt(position.line).text.substr(0, position.character).trim().split(" ");
+            const suggestions = this.completion(line[line.length-1]);
                 if (suggestions.length > 0) {
                     const configuration = vscode.workspace.getConfiguration('PandocCiter');
                     if (configuration.get('ViewType') as string === 'browser') {
@@ -57,10 +57,8 @@ export class Completer implements vscode.CompletionItemProvider {
     }
 
     completion(line: string) : vscode.CompletionItem[] {
-        let reg;
-        let provider;
-        reg = /(?:^|[ ;\[-])\@([^\]\s]*)/;
-        provider = this.citation;
+        let reg = /(?:^|[ ;\[-])\@([^\]\s]*)/;
+        let provider = this.citation;
             
         const result = line.match(reg);
         let suggestions: vscode.CompletionItem[] = [];

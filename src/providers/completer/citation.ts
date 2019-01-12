@@ -124,12 +124,14 @@ export class Citation {
                 const editor = vscode.window.activeTextEditor;
                 const content = editor.document.getText(new vscode.Range(new vscode.Position(0, 0), editor.selection.start));
                 let start = editor.selection.start;
-                if (content.lastIndexOf('\\cite') > content.lastIndexOf('}')) {
-                    const curlyStart = content.lastIndexOf('{') + 1;
-                    const commaStart = content.lastIndexOf(',') + 1;
-                    start = editor.document.positionAt(curlyStart > commaStart ? curlyStart : commaStart);
-                }
-                editor.edit(edit => edit.replace(new vscode.Range(start, editor.selection.start), selected.description || ''));
+                start = editor.document.positionAt(content.lastIndexOf('@')+1);
+                editor.edit(edit => {
+                    edit.replace(new vscode.Range(start, editor.selection.start), selected.description || '');
+                })
+                .then(() => {
+                    var postion = editor.selection.end; 
+                    editor.selection = new vscode.Selection(postion, postion);
+                });
             }
         });
     }

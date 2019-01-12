@@ -1,5 +1,11 @@
 # Change Log
 
+## [0.3.2] - 2019-01-11
+
+- Fixes:
+    + When `PandocCiter.ViewType` was set to `"browser"`, the inserted citation would be placed in a selected state. This was a problem because typing any character would erase the inserted citation, e.g. `@insertedKey` would become `@ ` if the space bar is pressed. Updated version should now deselect the citation as soon as it is done inserting it.
+    + The suggestions would pop-up as long as any `@key` exists on the line. This is because the regex searched for the suggestion trigger along the entire line, so any instance of a citation would lead to citation suggested throughout the line. Updated version should now only search for the citation trigger in the most recent word before the cursor instead of the entire line.  
+
 ## [0.3.1] - 2018-11-28
 
 - Updated vscode module to avoid [potential security issue](https://code.visualstudio.com/blogs/2018/11/26/event-stream) with the event-stream package.
