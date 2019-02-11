@@ -1,6 +1,6 @@
 # Change Log
 
-## [0.3.3] - 2019-02-11
+## [0.3.3-4] - 2019-02-11
 
 - For debugging: Add log event when providing suggestions
 

@@ -38,7 +38,6 @@ export function activate(context: vscode.ExtensionContext) {
 export class Extension {
     manager: Manager;
     completer: Completer;
-    showLog: Boolean;
     logPanel: vscode.OutputChannel;
 
     constructor() {
