@@ -42,6 +42,7 @@ export class Completer implements vscode.CompletionItemProvider {
         return new Promise((resolve, _reject) => {
             const line = document.lineAt(position.line).text.substr(0, position.character).trim().split(" ");
             const suggestions = this.completion(line[line.length-1]);
+            this.extension.log(`Showing ${suggestions.length} suggestions`);
                 if (suggestions.length > 0) {
                     const configuration = vscode.workspace.getConfiguration('PandocCiter');
                     if (configuration.get('ViewType') as string === 'browser') {
