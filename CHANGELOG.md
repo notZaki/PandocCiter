@@ -1,5 +1,9 @@
 # Change Log
 
+## [0.3.5] - 2019-03-04
+
+- Feature: Check if any duplicate keys exist when parsing a bib file
+
 ## [0.3.3-4] - 2019-02-11
 
 - For debugging: Add log event when providing suggestions

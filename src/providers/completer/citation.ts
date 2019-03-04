@@ -174,6 +174,18 @@ export class Citation {
             }
         }
         this.extension.log(`Parsed ${items.length} .bib entries from ${bibPath}.`);
+
+        // Find duplications
+        const allKeys = (items.map(items => items.key));
+        if ((new Set(allKeys)).size !== allKeys.length) {
+            // Code from: https://stackoverflow.com/questions/840781/get-all-non-unique-values-i-e-duplicate-more-than-one-occurrence-in-an-array
+            const count = keys => 
+                keys.reduce((a, b) => 
+                    Object.assign(a, {[b]: (a[b] || 0) + 1}), {});
+            const duplicates = dict => 
+                Object.keys(dict).filter((a) => dict[a] > 1);
+            vscode.window.showInformationMessage(`Duplicate key(s): ${duplicates(count(allKeys))}`);
+        }
         this.citationInBib[bibPath] = items;
     }
 
