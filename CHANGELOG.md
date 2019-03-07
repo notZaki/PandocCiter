@@ -1,5 +1,11 @@
 # Change Log
 
+## [0.3.6] - 2019-03-06
+
+- The completion provider terminates itself if it isn't triggered by an `@`.
+    + The completion provider was being executed for any typed character because intellisense is aggressive by default. Although not a big deal, it does mean that unnecessary computations are done for each keystroke. This update attempts to avoid the extra computation by terminating the function early if an `@` is not detected.
+        * There might be a good reason for intellisense's aggressiveness that I'm unaware of. Remains to be seen if this update breaks the completions for any users.
+
 ## [0.3.5] - 2019-03-04
 
 - Feature: Check if any duplicate keys exist when parsing a bib file

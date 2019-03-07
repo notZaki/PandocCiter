@@ -38,8 +38,11 @@ export class Completer implements vscode.CompletionItemProvider {
         this.citation = new Citation(extension);
     }
 
-    provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, _token: vscode.CancellationToken) : Promise<vscode.CompletionItem[]> {
+    provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, _token: vscode.CancellationToken, context:vscode.CompletionContext) : Promise<vscode.CompletionItem[]> {
         return new Promise((resolve, _reject) => {
+            const invoker = document.lineAt(position.line).text[position.character-1];
+            // Some user-configs will execute this function for each typed character. Terminate those calls early.
+            if (invoker !== '@') {resolve(); return;}
             const line = document.lineAt(position.line).text.substr(0, position.character).trim().split(" ");
             const suggestions = this.completion(line[line.length-1]);
             this.extension.log(`Showing ${suggestions.length} suggestions`);
