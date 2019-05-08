@@ -1,5 +1,9 @@
 # Change Log
 
+## [0.3.7] - 2019-05-08
+
+- Minor update to dependancies becuase of upstream security warnings
+
 ## [0.3.6] - 2019-03-06
 
 - The completion provider terminates itself if it isn't triggered by an `@`.
