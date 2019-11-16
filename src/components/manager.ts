@@ -49,10 +49,22 @@ export class Manager {
         }
     }
 
+    forgetUnusedFiles(filesToForget: string[]) {
+        for (let i in filesToForget) {
+            let filePath = filesToForget[i];
+            this.extension.log(`Forget unused bib file: ${filePath}`);
+            this.extension.completer.citation.forgetParsedBibItems(filePath);
+            this.bibWatcher.unwatch(filePath);
+            this.watched.splice(this.watched.indexOf(filePath), 1);
+        }
+        return;
+    }
+
     findBib() : void {
         const bibRegex = /^bibliography:\s* \[(.*)\]/m;
         const activeText = vscode.window.activeTextEditor!.document.getText();
         let bibresult = activeText.match(bibRegex);
+        let foundFiles: string[] = [];
         if (bibresult) {
             const bibFiles = bibresult[1].split(',').map(item => item.trim());
             for (let i in bibFiles) {
@@ -62,6 +74,7 @@ export class Manager {
                 }
                 this.extension.log('Looking for .bib file: ' + bibFile);
                 this.addBibToWatcher(bibFile);
+                foundFiles.push(bibFile)
             }
         }
         const configuration = vscode.workspace.getConfiguration('PandocCiter');
@@ -82,6 +95,7 @@ export class Manager {
                     }
                     this.extension.log('Looking for .bib file: ' + bibFile);
                     this.addBibToWatcher(bibFile);
+                    foundFiles.push(bibFile)
                 }
             }
         }
@@ -89,6 +103,11 @@ export class Manager {
             let bibFile = path.join(configuration.get('DefaultBib'));
             this.extension.log('Looking for .bib file: ' + bibFile);
             this.addBibToWatcher(bibFile);
+            foundFiles.push(bibFile)
+        }
+        let watched_but_not_found = this.watched.filter(e => !foundFiles.includes(e))
+        if (watched_but_not_found.length > 0) {
+            this.forgetUnusedFiles(watched_but_not_found)
         }
         return;
     }
