@@ -1,5 +1,10 @@
 # Change Log
 
+## [0.4.0] - 2019-11-16
+
+- Fixed an issue where quoted paths were not recognized correctly
+- Extension should now forget suggestions from bib files which are removed from the `bibliography` field
+
 ## [0.3.7] - 2019-05-08
 
 - Minor update to dependancies becuase of upstream security warnings
