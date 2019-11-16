@@ -41,6 +41,14 @@ export class Manager {
         this.watched   = [];
     }
 
+    stripQuotes(inputString: string) {
+        if (inputString[0] == inputString[inputString.length-1] && "\"'".includes(inputString[0])) {
+            return inputString.slice(1, -1)
+        } else {
+            return inputString
+        }
+    }
+
     findBib() : void {
         const bibRegex = /^bibliography:\s* \[(.*)\]/m;
         const activeText = vscode.window.activeTextEditor!.document.getText();
@@ -48,7 +56,7 @@ export class Manager {
         if (bibresult) {
             const bibFiles = bibresult[1].split(',').map(item => item.trim());
             for (let i in bibFiles) {
-                let bibFile = bibFiles[i];
+                let bibFile = this.stripQuotes(bibFiles[i]);
                 if (!path.isAbsolute(bibFile)) { 
                     bibFile = path.resolve(path.dirname(vscode.window.activeTextEditor!.document.fileName), bibFile);
                 }
