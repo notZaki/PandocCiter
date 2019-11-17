@@ -67,6 +67,11 @@
                     "type": "boolean",
                     "default": true,
                     "description": "Whether to use the Default Bib"
+                },
+                "PandocCiter.ForgetUnusedBib": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Whether to forget bib file when changing documents"
                 }
             }
         }

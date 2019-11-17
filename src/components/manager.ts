@@ -106,8 +106,10 @@ export class Manager {
             foundFiles.push(bibFile)
         }
         let watched_but_not_found = this.watched.filter(e => !foundFiles.includes(e))
-        if (watched_but_not_found.length > 0) {
-            this.forgetUnusedFiles(watched_but_not_found)
+        if (configuration.get('ForgetUnusedBib')) {
+            if (watched_but_not_found.length > 0) {
+                this.forgetUnusedFiles(watched_but_not_found)
+            }
         }
         return;
     }
