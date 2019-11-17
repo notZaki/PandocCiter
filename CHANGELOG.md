@@ -12,6 +12,10 @@
 - Fixed an issue where quoted paths were not recognized correctly
 - Extension should now forget suggestions from bib files which are removed from the `bibliography` field
 
+## [0.3.8] - 2019-09-12
+
+- Update to lighter dependencies
+
 ## [0.3.7] - 2019-05-08
 
 - Minor update to dependancies becuase of upstream security warnings
