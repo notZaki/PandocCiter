@@ -190,7 +190,7 @@ export class Citation {
     }
 
     forgetParsedBibItems(bibPath: string) {
-        this.extension.logPanel.append(`Forgetting parsed bib entries for ${bibPath}`);
+        this.extension.log(`Forgetting parsed bib entries for ${bibPath}`);
         delete this.citationInBib[bibPath];
     }
 

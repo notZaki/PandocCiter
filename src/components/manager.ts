@@ -72,7 +72,7 @@ export class Manager {
                 if (!path.isAbsolute(bibFile)) { 
                     bibFile = path.resolve(path.dirname(vscode.window.activeTextEditor!.document.fileName), bibFile);
                 }
-                this.extension.log('Looking for .bib file: ' + bibFile);
+                this.extension.log(`Looking for .bib file: ${bibFile}`);
                 this.addBibToWatcher(bibFile);
                 foundFiles.push(bibFile)
             }
@@ -93,7 +93,7 @@ export class Manager {
                     if (!path.isAbsolute(bibFile)) { 
                         bibFile = path.resolve(vscode.workspace.rootPath, bibFile);
                     }
-                    this.extension.log('Looking for .bib file: ' + bibFile);
+                    this.extension.log(`Looking for .bib file: ${bibFile}`);
                     this.addBibToWatcher(bibFile);
                     foundFiles.push(bibFile)
                 }
@@ -101,7 +101,7 @@ export class Manager {
         }
         if (configuration.get('UseDefaultBib') && (configuration.get('DefaultBib') !== "")) {
             let bibFile = path.join(configuration.get('DefaultBib'));
-            this.extension.log('Looking for .bib file: ' + bibFile);
+            this.extension.log(`Looking for .bib file: ${bibFile}`);
             this.addBibToWatcher(bibFile);
             foundFiles.push(bibFile)
         }
