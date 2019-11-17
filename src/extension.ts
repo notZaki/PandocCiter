@@ -15,7 +15,8 @@ export function activate(context: vscode.ExtensionContext) {
     }));
 
     context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(() => {
-        if (vscode.window.activeTextEditor) {
+        if ((vscode.window.activeTextEditor) && 
+            (['markdown', 'rmd'].includes(vscode.window.activeTextEditor.document.languageId))) {
             extension.manager.findBib();
         }
     }));
