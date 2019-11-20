@@ -61,7 +61,7 @@ export class Manager {
     }
 
     findBib() : void {
-        const bibRegex = /^bibliography:\s* \[(.*)\]/m;
+        const bibRegex = /^.. bibliography::\s*(.*)/m;
         const activeText = vscode.window.activeTextEditor!.document.getText();
         let bibresult = activeText.match(bibRegex);
         let foundFiles: string[] = [];

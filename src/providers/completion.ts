@@ -42,7 +42,7 @@ export class Completer implements vscode.CompletionItemProvider {
         return new Promise((resolve, _reject) => {
             const invoker = document.lineAt(position.line).text[position.character-1];
             // Some user-configs will execute this function for each typed character. Terminate those calls early.
-            if (invoker !== '@') {resolve(); return;}
+            if (invoker !== '`') {resolve(); return;}
             const line = document.lineAt(position.line).text.substr(0, position.character).trim().split(" ");
             const suggestions = this.completion(line[line.length-1]);
             this.extension.log(`Showing ${suggestions.length} suggestions`);
@@ -61,7 +61,7 @@ export class Completer implements vscode.CompletionItemProvider {
     }
 
     completion(line: string) : vscode.CompletionItem[] {
-        let reg = /(?:^|[ ;\[-])\@([^\]\s]*)/;
+        let reg = /:cite:`([^\]\s]*)/;
         let provider = this.citation;
             
         const result = line.match(reg);

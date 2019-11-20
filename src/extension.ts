@@ -15,8 +15,7 @@ export function activate(context: vscode.ExtensionContext) {
     }));
 
     context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(() => {
-        if ((vscode.window.activeTextEditor) && 
-            (['markdown', 'rmd'].includes(vscode.window.activeTextEditor.document.languageId))) {
+        if (vscode.window.activeTextEditor) {
             extension.manager.findBib();
         }
     }));
@@ -29,11 +28,8 @@ export function activate(context: vscode.ExtensionContext) {
 
     extension.manager.findBib();
     context.subscriptions.push(vscode.languages.registerCompletionItemProvider(
-        {scheme: 'file', language: 'markdown'}, 
-        extension.completer, '@'));
-    context.subscriptions.push(vscode.languages.registerCompletionItemProvider(
-        {scheme: 'file', language: 'rmd'}, 
-        extension.completer, '@'));
+        {scheme: 'file', language: 'restructuredtext'}, 
+        extension.completer, '`'));
 }
 
 export class Extension {

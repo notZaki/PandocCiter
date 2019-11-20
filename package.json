@@ -2,7 +2,7 @@
     "name": "pandocciter",
     "displayName": "Pandoc Citer",
     "description": "Autocomplete bibtex citations for markdown/pandoc",
-    "version": "0.4.1",
+    "version": "0.4.2",
     "publisher": "notZaki",
     "license": "MIT",
     "engines": {
@@ -21,21 +21,10 @@
         "Other"
     ],
     "activationEvents": [
-        "onLanguage:markdown",
-        "onLanguage:rmd"
+        "onLanguage:restructuredtext"
     ],
     "main": "./out/extension",
     "contributes": {
-        "grammars": [
-            {
-                "injectTo": [
-                    "text.html.markdown",
-                    "text.html.markdown.redcarpet"
-                ],
-                "scopeName": "pandoc-citation",
-                "path": "./syntaxes/citations.json"
-            }
-        ],
         "configuration": {
             "title": "PandocCiter",
             "properties": {
@@ -55,7 +44,7 @@
                 },
                 "PandocCiter.ShowLog": {
                     "type": "boolean",
-                    "default": false,
+                    "default": true,
                     "description": "Should log be shown in Output panel"
                 },
                 "PandocCiter.DefaultBib": {
@@ -70,7 +59,7 @@
                 },
                 "PandocCiter.ForgetUnusedBib": {
                     "type": "boolean",
-                    "default": true,
+                    "default": false,
                     "description": "Whether to forget bib file when changing documents"
                 }
             }
