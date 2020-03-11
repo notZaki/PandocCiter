@@ -1,6 +1,10 @@
 # Change Log
 
-## [0.4.1] - 2018-11-16
+## [0.4.2] - 2020-03-11
+
+- Fix UseDefaultBib with relative path (#11 - @smartens)
+
+## [0.4.1] - 2019-11-16
 
 - Added a config option which can disable the 'forgetting' feature added in 0.4.0
     + For example, if a project has multiple markdown files where the bibliography should be shared but only one file has a YAML header, then setting `PandocCiter.ForgetUnusedBib: false` will allow the citation suggestions to appear in all of the markdown files.
