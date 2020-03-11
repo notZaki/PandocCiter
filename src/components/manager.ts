@@ -101,6 +101,9 @@ export class Manager {
         }
         if (configuration.get('UseDefaultBib') && (configuration.get('DefaultBib') !== "")) {
             let bibFile = path.join(configuration.get('DefaultBib'));
+            if (!path.isAbsolute(bibFile)) { 
+                bibFile = path.join(vscode.workspace.rootPath, configuration.get('DefaultBib'));
+            }
             this.extension.log(`Looking for .bib file: ${bibFile}`);
             this.addBibToWatcher(bibFile);
             foundFiles.push(bibFile)
