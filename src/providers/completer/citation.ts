@@ -27,95 +27,51 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 
 import {Extension} from '../../extension';
+import {bibtexParser} from 'latex-utensils';
 
-const bibEntries = ['article', 'book', 'bookinbook', 'booklet', 'collection', 'conference', 'inbook',
-                    'incollection', 'inproceedings', 'inreference', 'manual', 'mastersthesis', 'misc',
-                    'mvbook', 'mvcollection', 'mvproceedings', 'mvreference', 'online', 'patent', 'periodical',
-                    'phdthesis', 'proceedings', 'reference', 'report', 'set', 'suppbook', 'suppcollection',
-                    'suppperiodical', 'techreport', 'thesis', 'unpublished'];
 
-interface CitationRecord {
+export interface Suggestion extends vscode.CompletionItem {
     key: string;
-    [key: string]: string | undefined;
+    detail: string;
+    fields: {[key: string]: string};
+    file: string;
+    position: vscode.Position;
 }
 
 export class Citation {
     extension: Extension;
-    suggestions: vscode.CompletionItem[];
-    citationInBib: { [id: string]: CitationRecord[] } = {};
-    citationData: { [id: string]: {item: {}, text: string, position: vscode.Position, file: string} } = {};
-    refreshTimer: number;
+    private bibEntries: {[file: string]: Suggestion[]} = {};
 
     constructor(extension: Extension) {
         this.extension = extension;
     }
-
-    provide() : vscode.CompletionItem[] {
-        if (Date.now() - this.refreshTimer < 1000) {
-            return this.suggestions;
-        }
-        this.refreshTimer = Date.now();
-
-        const items: CitationRecord[] = [];
-        Object.keys(this.citationInBib).forEach(bibPath => {
-            this.citationInBib[bibPath].forEach(item => items.push(item));
-        });
-
-        const configuration = vscode.workspace.getConfiguration('latex-workshop');
-        this.suggestions = items.map(item => {
-            const citation = new vscode.CompletionItem(item.key, vscode.CompletionItemKind.Reference);
-            citation.detail = item.title;
-            switch (configuration.get('intellisense.citation.label') as string) {
-                case 'bibtex key':
-                default:
-                    citation.label = item.key;
-                    break;
-                case 'title':
-                    if (item.title) {
-                        citation.label = item.title as string;
-                        citation.detail = undefined;
-                    } else {
-                        citation.label = item.key;
-                    }
-                    break;
-                case 'authors':
-                    if (item.author) {
-                        citation.label = item.author as string;
-                        citation.detail = undefined;
-                    } else {
-                        citation.label = item.key;
-                    }
-                    break;
+    
+    provide(args?: {document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext}): vscode.CompletionItem[] {
+        // Compile the suggestion array to vscode completion array
+        return this.updateAll().map(item => {
+            item.filterText = `${item.key} ${item.fields.author} ${item.fields.title} ${item.fields.journal}`;
+            item.insertText = item.key;
+            // Documentation seems unnecessary (it is only duplicate of detail)
+            // item.documentation = item.detail;
+            if (args) {
+                item.range = args.document.getWordRangeAtPosition(args.position, /[-a-zA-Z0-9_:.]+/);
             }
-
-            citation.filterText = `${item.key} ${item.author} ${item.title} ${item.journal}`;
-            citation.insertText = item.key;
-            citation.documentation = Object.keys(item)
-                .filter(key => (key !== 'key'))
-                .map(key => `${key}: ${item[key]}`)
-                .join('\n');
-            return citation;
+            return item;
         });
-        return this.suggestions;
     }
 
-    browser() {
-        this.provide();
-        const items: CitationRecord[] = [];
-        Object.keys(this.citationInBib).forEach(bibPath => {
-            this.citationInBib[bibPath].forEach(item => items.push(item));
-        });
-        const pickItems: vscode.QuickPickItem[] = items.map(item => {
+    browser(_args?: {document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext}) {
+        vscode.window.showQuickPick(this.updateAll().map(item => {
             return {
-                label: item.title ? item.title as string : '',
+                label: item.fields.title ? item.fields.title : '',
                 description: `${item.key}`,
-                detail: `Authors: ${item.author ? item.author : 'Unknown'}, publication: ${item.journal ? item.journal : (item.publisher ? item.publisher : 'Unknown')}`
+                detail: `Authors: ${item.fields.author ? item.fields.author : 'Unknown'}, publication: ${item.fields.journal ? item.fields.journal : (item.fields.journaltitle ? item.fields.journaltitle : (item.fields.publisher ? item.fields.publisher : 'Unknown'))}`
             };
-        });
-        vscode.window.showQuickPick(pickItems, {
+        }), {
             placeHolder: 'Press ENTER to insert citation key at cursor',
             matchOnDetail: true,
-            matchOnDescription: true
+            matchOnDescription: true,
+            ignoreFocusOut: true
         }).then(selected => {
             if (!selected) {
                 return;
@@ -124,58 +80,69 @@ export class Citation {
                 const editor = vscode.window.activeTextEditor;
                 const content = editor.document.getText(new vscode.Range(new vscode.Position(0, 0), editor.selection.start));
                 let start = editor.selection.start;
-                start = editor.document.positionAt(content.lastIndexOf('@')+1);
-                editor.edit(edit => {
-                    edit.replace(new vscode.Range(start, editor.selection.start), selected.description || '');
-                })
-                .then(() => {
-                    var postion = editor.selection.end; 
-                    editor.selection = new vscode.Selection(postion, postion);
-                });
+                if (content.lastIndexOf('\\cite') > content.lastIndexOf('}')) {
+                    const curlyStart = content.lastIndexOf('{') + 1;
+                    const commaStart = content.lastIndexOf(',') + 1;
+                    start = editor.document.positionAt(curlyStart > commaStart ? curlyStart : commaStart);
+                }
+                editor.edit(edit => edit.replace(new vscode.Range(start, editor.selection.start), selected.description || ''))
+                    .then(() => editor.selection = new vscode.Selection(editor.selection.end, editor.selection.end));
             }
         });
     }
 
-    parseBibFile(bibPath: string) {
-        this.extension.log(`Parsing .bib entries from ${bibPath}`);
-        const items: CitationRecord[] = [];
-        const content = fs.readFileSync(bibPath, 'utf-8');
-        const contentNoNewLine = content.replace(/[\r\n]/g, ' ');
-        const itemReg = /@(\w+)\s*{/g;
-        let result = itemReg.exec(contentNoNewLine);
-        let prevResult: RegExpExecArray | null = null;
-        let numLines = 0;
-        let prevPrevResultIndex = 0;
-        while (result || prevResult) {
-            if (prevResult && bibEntries.indexOf(prevResult[1].toLowerCase()) > -1) {
-                const itemString = contentNoNewLine.substring(prevResult.index, result ? result.index : undefined).trim();
-                const item = this.parseBibString(itemString);
-                if (item !== undefined) {
-                    items.push(item);
-                    numLines = numLines + content.substring(prevPrevResultIndex, prevResult.index).split('\n').length;
-                    prevPrevResultIndex = prevResult.index;
-                    this.citationData[item.key] = {
-                        item,
-                        text: Object.keys(item)
-                            .filter(key => (key !== 'key'))
-                            .map(key => `${key}: ${item[key]}`)
-                            .join('\n\n'),
-                            position: new vscode.Position(numLines - 1, 0),
-                        file: bibPath
-                    };
-                } else {
-                    // TODO we could consider adding a diagnostic for this case so the issue appears in the Problems list
-                    this.extension.logPanel.append(`Warning - following .bib entry in ${bibPath} has no cite key:\n${itemString}`);
+    parseBibFile(file: string) {
+        const fields: string[] = (vscode.workspace.getConfiguration('PandocCiter').get('CitationFormat') as string[]).map(f => { return f.toLowerCase(); });
+        this.extension.log(`Parsing .bib entries from ${file}`);
+        this.bibEntries[file] = [];
+        const bibtex = fs.readFileSync(file).toString();
+        const ast = bibtexParser.parse(bibtex);
+        ast.content
+            .filter(bibtexParser.isEntry)
+            .forEach((entry: bibtexParser.Entry) => {
+                if (entry.internalKey === undefined) {
+                    return;
                 }
-            }
-            prevResult = result;
-            if (result) {
-                result = itemReg.exec(contentNoNewLine);
-            }
-        }
-        this.extension.log(`Parsed ${items.length} .bib entries from ${bibPath}.`);
+                const item: Suggestion = {
+                    key: entry.internalKey,
+                    label: entry.internalKey,
+                    file,
+                    position: new vscode.Position(entry.location.start.line - 1, entry.location.start.column - 1),
+                    kind: vscode.CompletionItemKind.Reference,
+                    detail: '',
+                    fields: {}
+                };
+                entry.content.forEach(field => {
+                    const value = Array.isArray(field.value.content) ?
+                        field.value.content.join(' ') : this.deParenthesis(field.value.content);
+                    item.fields[field.name] = value;
+                    if (fields.includes(field.name.toLowerCase())) {
+                        item.detail += `${field.name.charAt(0).toUpperCase() + field.name.slice(1)}: ${value}\n`;
+                    }
+                });
+                this.bibEntries[file].push(item);
+            });
+        this.extension.log(`Parsed ${this.bibEntries[file].length} bib entries from ${file}.`);
+    }
 
-        // Find duplications
+    private deParenthesis(str: string) {
+        return str.replace(/{+([^\\{}]+)}+/g, '$1');
+    }
+
+    private updateAll(bibFiles?: string[]): Suggestion[] {
+        let suggestions: Suggestion[] = [];
+        // From bib files
+        if (bibFiles === undefined) {
+            bibFiles = Object.keys(this.bibEntries);
+        }
+        bibFiles.forEach(file => {
+            suggestions = suggestions.concat(this.bibEntries[file]);
+        });
+        this.checkForDuplicates(suggestions);
+        return suggestions;
+    }
+
+    checkForDuplicates(items: Suggestion[]) {
         const allKeys = (items.map(items => items.key));
         if ((new Set(allKeys)).size !== allKeys.length) {
             // Code from: https://stackoverflow.com/questions/840781/get-all-non-unique-values-i-e-duplicate-more-than-one-occurrence-in-an-array
@@ -186,62 +153,10 @@ export class Citation {
                 Object.keys(dict).filter((a) => dict[a] > 1);
             vscode.window.showInformationMessage(`Duplicate key(s): ${duplicates(count(allKeys))}`);
         }
-        this.citationInBib[bibPath] = items;
     }
 
     forgetParsedBibItems(bibPath: string) {
         this.extension.log(`Forgetting parsed bib entries for ${bibPath}`);
-        delete this.citationInBib[bibPath];
-    }
-
-    parseBibString(item: string) {
-        const bibDefinitionReg = /((@)[a-zA-Z]+)\s*(\{)\s*([^\s,]*)/g;
-        let regResult = bibDefinitionReg.exec(item);
-        if (!regResult) {
-            return undefined;
-        }
-        item = item.substr(bibDefinitionReg.lastIndex);
-        const bibItem: CitationRecord = { key: regResult[4] };
-        const bibAttrReg = /([a-zA-Z0-9\!\$\&\*\+\-\.\/\:\;\<\>\?\[\]\^\_\`\|]+)\s*(\=)/g;
-        regResult = bibAttrReg.exec(item);
-        while (regResult) {
-            const attrKey = regResult[1];
-            item = item.substr(bibAttrReg.lastIndex);
-            bibAttrReg.lastIndex = 0;
-            const quotePos = /\"/g.exec(item);
-            const bracePos = /{/g.exec(item);
-            let attrValue = '';
-            if (bracePos && (!quotePos || quotePos.index > bracePos.index)) {
-                // Use curly braces
-                let nested = 0;
-                for (let i = bracePos.index; i < item.length; ++i) {
-                    const char = item[i];
-                    if (char === '{' && item[i - 1] !== '\\') {
-                        nested++;
-                    } else if (char === '}' && item[i - 1] !== '\\') {
-                        nested--;
-                    }
-                    if (nested === 0) {
-                        attrValue = item.substring(bracePos.index + 1, i)
-                                        .replace(/(\\.)|({)/g, '$1').replace(/(\\.)|(})/g, '$1');
-                        item = item.substr(i);
-                        break;
-                    }
-                }
-            } else if (quotePos) {
-                // Use double quotes
-                for (let i = quotePos.index + 1; i < item.length; ++i) {
-                    if (item[i] === '"') {
-                        attrValue = item.substring(quotePos.index + 1, i)
-                                        .replace(/(\\.)|({)/g, '$1').replace(/(\\.)|(})/g, '$1');
-                        item = item.substr(i);
-                        break;
-                    }
-                }
-            }
-            bibItem[attrKey.toLowerCase()] = attrValue;
-            regResult = bibAttrReg.exec(item);
-        }
-        return bibItem;
+        delete this.bibEntries[bibPath];
     }
 }
