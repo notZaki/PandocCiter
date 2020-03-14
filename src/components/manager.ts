@@ -41,25 +41,6 @@ export class Manager {
         this.watched   = [];
     }
 
-    stripQuotes(inputString: string) {
-        if (inputString[0] == inputString[inputString.length-1] && "\"'".includes(inputString[0])) {
-            return inputString.slice(1, -1)
-        } else {
-            return inputString
-        }
-    }
-
-    forgetUnusedFiles(filesToForget: string[]) {
-        for (let i in filesToForget) {
-            let filePath = filesToForget[i];
-            this.extension.log(`Forget unused bib file: ${filePath}`);
-            this.extension.completer.citation.forgetParsedBibItems(filePath);
-            this.bibWatcher.unwatch(filePath);
-            this.watched.splice(this.watched.indexOf(filePath), 1);
-        }
-        return;
-    }
-
     findBib() : void {
         const bibRegex = /^bibliography:\s* \[(.*)\]/m;
         const activeText = vscode.window.activeTextEditor!.document.getText();
@@ -69,17 +50,14 @@ export class Manager {
             const bibFiles = bibresult[1].split(',').map(item => item.trim());
             for (let i in bibFiles) {
                 let bibFile = this.stripQuotes(bibFiles[i]);
-                if (!path.isAbsolute(bibFile)) { 
-                    bibFile = path.resolve(path.dirname(vscode.window.activeTextEditor!.document.fileName), bibFile);
-                }
+                bibFile = this.resolveBibFile(bibFile);
                 this.extension.log(`Looking for .bib file: ${bibFile}`);
                 this.addBibToWatcher(bibFile);
-                foundFiles.push(bibFile)
+                foundFiles.push(bibFile);
             }
         }
         const configuration = vscode.workspace.getConfiguration('PandocCiter');
         if (configuration.get('RootFile') !== "") {
-            // var curInput = path.join(vscode.workspace.rootPath, configuration.get('RootFile'));
             let curInput = path.join(configuration.get('RootFile'));
             if (!path.isAbsolute(curInput)) { 
                 curInput = path.join(vscode.workspace.rootPath, configuration.get('RootFile'));
@@ -90,40 +68,46 @@ export class Manager {
                 const bibFiles = bibresult[1].split(',').map(item => item.trim());
                 for (let i in bibFiles) {
                     let bibFile = path.join(path.dirname(curInput), bibFiles[i]);
-                    if (!path.isAbsolute(bibFile)) { 
-                        bibFile = path.resolve(vscode.workspace.rootPath, bibFile);
-                    }
+                    bibFile = this.resolveBibFile(bibFile);
                     this.extension.log(`Looking for .bib file: ${bibFile}`);
                     this.addBibToWatcher(bibFile);
-                    foundFiles.push(bibFile)
+                    foundFiles.push(bibFile);
                 }
             }
         }
         if (configuration.get('UseDefaultBib') && (configuration.get('DefaultBib') !== "")) {
             let bibFile = path.join(configuration.get('DefaultBib'));
-            if (!path.isAbsolute(bibFile)) { 
-                bibFile = path.join(vscode.workspace.rootPath, configuration.get('DefaultBib'));
-            }
+            bibFile = this.resolveBibFile(bibFile);
             this.extension.log(`Looking for .bib file: ${bibFile}`);
             this.addBibToWatcher(bibFile);
-            foundFiles.push(bibFile)
+            foundFiles.push(bibFile);
         }
-        let watched_but_not_found = this.watched.filter(e => !foundFiles.includes(e))
+        let watched_but_not_found = this.watched.filter(e => !foundFiles.includes(e));
         if (configuration.get('ForgetUnusedBib')) {
             if (watched_but_not_found.length > 0) {
-                this.forgetUnusedFiles(watched_but_not_found)
+                this.forgetUnusedFiles(watched_but_not_found);
             }
         }
         return;
     }
 
-    addBibToWatcher(bib: string) {
-        let bibPath;
-        if (path.isAbsolute(bib)) {
-            bibPath = bib;
+    stripQuotes(inputString: string) {
+        if (inputString[0] === inputString[inputString.length-1] && "\"'".includes(inputString[0])) {
+            return inputString.slice(1, -1);
         } else {
-            bibPath = path.resolve(path.dirname(vscode.window.activeTextEditor!.document.fileName), bib);
+            return inputString;
         }
+    }
+
+    resolveBibFile(bibFile: string) {
+        if (path.isAbsolute(bibFile)) {
+            return bibFile;
+        } else { 
+            return path.resolve(path.dirname(vscode.window.activeTextEditor!.document.fileName), bibFile);
+        }
+    }
+
+    addBibToWatcher(bibPath: string) {
         if (path.extname(bibPath) === '') {
             bibPath += '.bib';
         }
@@ -156,4 +140,16 @@ export class Manager {
             }
         }
     }
+
+    forgetUnusedFiles(filesToForget: string[]) {
+        for (let i in filesToForget) {
+            let filePath = filesToForget[i];
+            this.extension.log(`Forget unused bib file: ${filePath}`);
+            this.extension.completer.citation.forgetParsedBibItems(filePath);
+            this.bibWatcher.unwatch(filePath);
+            this.watched.splice(this.watched.indexOf(filePath), 1);
+        }
+        return;
+    }
+
 }
