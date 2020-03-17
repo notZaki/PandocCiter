@@ -1,5 +1,9 @@
 # Change Log
 
+## [0.5.0] - 2020-03-17
+
+- Switch to [latex-utensils](https://www.npmjs.com/package/latex-utensils) on the backend to support custom BibEntries (#12)
+
 ## [0.4.2] - 2020-03-11
 
 - Fix UseDefaultBib with relative path (#11 - @smartens)
