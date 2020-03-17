@@ -100,6 +100,7 @@ export class Manager {
     }
 
     resolveBibFile(bibFile: string) {
+        bibFile = bibFile.replace("${workspaceFolder}",vscode.workspace.rootPath);
         if (path.isAbsolute(bibFile)) {
             return bibFile;
         } else { 

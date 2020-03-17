@@ -1,5 +1,9 @@
 # Change Log
 
+## [0.6.0] - 2020-03-17
+
+- Support `${workspaceFolder}` in bib path (#13)
+
 ## [0.5.0] - 2020-03-17
 
 - Switch to [latex-utensils](https://www.npmjs.com/package/latex-utensils) on the backend to support custom BibEntries (#12)
