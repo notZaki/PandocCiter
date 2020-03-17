@@ -9,12 +9,14 @@ export function activate(context: vscode.ExtensionContext) {
     const extension = new Extension();
 
     context.subscriptions.push(vscode.workspace.onDidOpenTextDocument(() => {
+        extension.log("Reacting to document open")
         if (vscode.window.activeTextEditor) {
             extension.manager.findBib();
         }
     }));
 
     context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(() => {
+        extension.log("Reacting to active document change")
         if ((vscode.window.activeTextEditor) && 
             (['markdown', 'rmd'].includes(vscode.window.activeTextEditor.document.languageId))) {
             extension.manager.findBib();
@@ -22,6 +24,7 @@ export function activate(context: vscode.ExtensionContext) {
     }));
 
     context.subscriptions.push(vscode.workspace.onDidSaveTextDocument(() => {
+        extension.log("Reacting to document save")
         if (vscode.window.activeTextEditor) {
             extension.manager.findBib();
         }
