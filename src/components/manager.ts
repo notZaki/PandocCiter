@@ -77,7 +77,7 @@ export class Manager {
         }
         if (configuration.get('UseDefaultBib') && (configuration.get('DefaultBib') !== "")) {
             let bibFile = path.join(configuration.get('DefaultBib'));
-            bibFile = this.resolveBibFile(bibFile);
+            bibFile = this.resolveBibFile(bibFile, true);
             this.extension.log(`Looking for .bib file: ${bibFile}`);
             this.addBibToWatcher(bibFile);
             foundFiles.push(bibFile);
@@ -99,11 +99,12 @@ export class Manager {
         }
     }
 
-    resolveBibFile(bibFile: string) {
-        bibFile = bibFile.replace("${workspaceFolder}",vscode.workspace.rootPath);
+    resolveBibFile(bibFile: string, useWorkspaceFolder?: boolean) {
         if (path.isAbsolute(bibFile)) {
             return bibFile;
-        } else { 
+        } else if (useWorkspaceFolder) { 
+            return path.resolve(vscode.workspace.rootPath, bibFile);
+        } else {
             return path.resolve(path.dirname(vscode.window.activeTextEditor!.document.fileName), bibFile);
         }
     }

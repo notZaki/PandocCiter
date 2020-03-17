@@ -1,5 +1,10 @@
 # Change Log
 
+## [0.7.0] - 2020-03-17
+
+- Remove support for `${workspaceFolder}` in bib path
+- If the path in `PandocCiter.DefaultBib` is relative, then it will be assumed that the path is relative to the workspaceFolder
+
 ## [0.6.0] - 2020-03-17
 
 - Support `${workspaceFolder}` in bib path (#13)
