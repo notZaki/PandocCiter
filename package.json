@@ -68,6 +68,11 @@
                     "default": true,
                     "description": "Whether to use the Default Bib"
                 },
+                "PandocCiter.Autofind": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Automatically find bib files in workspace"
+                },
                 "PandocCiter.ForgetUnusedBib": {
                     "type": "boolean",
                     "default": true,
@@ -97,7 +102,8 @@
     },
     "dependencies": {
         "chokidar": "^3.0.2",
-        "latex-utensils": "^1.2.3"
+        "latex-utensils": "^1.2.3",
+        "readdirp": "^3.4.0"
     },
     "devDependencies": {
         "@types/node": "^10.14.17",

@@ -28,8 +28,10 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as chokidar from 'chokidar';
+import * as readdirp from 'readdirp';
 
 import {Extension} from '../extension';
+import { Z_PARTIAL_FLUSH } from 'zlib';
 
 export class Manager {
     extension: Extension;
@@ -45,7 +47,7 @@ export class Manager {
         const bibRegex = /^bibliography:\s* \[(.*)\]/m;
         const activeText = vscode.window.activeTextEditor!.document.getText();
         let bibresult = activeText.match(bibRegex);
-        let foundFiles: string[] = [];
+        var foundFiles: string[] = [];
         if (bibresult) {
             const bibFiles = bibresult[1].split(',').map(item => item.trim());
             for (let i in bibFiles) {
@@ -81,6 +83,18 @@ export class Manager {
             this.extension.log(`Looking for .bib file: ${bibFile}`);
             this.addBibToWatcher(bibFile);
             foundFiles.push(bibFile);
+        }
+        if ((configuration.get('Autofind')) &&
+        (['markdown', 'rmd'].includes(vscode.window.activeTextEditor.document.languageId))) {
+            readdirp(vscode.workspace.rootPath, {fileFilter: '*.bib', directoryFilter: ['!.git']})
+            .on('data', (entry) => {
+                let bibFile = entry.fullPath
+                foundFiles.push(bibFile)
+                this.extension.log(`Looking for .bib file: ${bibFile}`);
+                this.addBibToWatcher(bibFile);
+            })
+            .on('warn', error => console.error('non-fatal error', error))
+            .on('error', error => console.error('fatal error', error))
         }
         let watched_but_not_found = this.watched.filter(e => !foundFiles.includes(e));
         if (configuration.get('ForgetUnusedBib')) {
