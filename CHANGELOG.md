@@ -1,5 +1,9 @@
 # Change Log
 
+## [0.8.0] - 2021-03-16
+
+- Add support for `Pweave Markdown` files
+
 ## [0.7.0] - 2020-03-17
 
 - Remove support for `${workspaceFolder}` in bib path
