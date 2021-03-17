@@ -18,7 +18,7 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(() => {
         extension.log("Reacting to active document change")
         if ((vscode.window.activeTextEditor) && 
-            (['markdown', 'rmd'].includes(vscode.window.activeTextEditor.document.languageId))) {
+            (['markdown', 'rmd', 'pweave_md'].includes(vscode.window.activeTextEditor.document.languageId))) {
             extension.manager.findBib();
         }
     }));
@@ -36,6 +36,9 @@ export function activate(context: vscode.ExtensionContext) {
         extension.completer, '@'));
     context.subscriptions.push(vscode.languages.registerCompletionItemProvider(
         {scheme: 'file', language: 'rmd'}, 
+        extension.completer, '@'));
+    context.subscriptions.push(vscode.languages.registerCompletionItemProvider(
+        {scheme: 'file', language: 'pweave_md'}, 
         extension.completer, '@'));
 }
 
