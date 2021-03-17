@@ -1,5 +1,5 @@
 {
-    "injectionSelector": "L:text.html.markdown",
+    "injectionSelector": ["L:text.html.markdown", "L:source.pweave.md"],
     "patterns": [
         {
             "include": "#pandoc-citationA"
