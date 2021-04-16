@@ -42,6 +42,9 @@ This extension provides autocompletion of citations stored in a bibtex file, for
 - `PandocCiter.ShowLog`
     + Type: Boolean, default is `false`
     + Function: This will show a log in the Output panel, useful for answering questions like "Why isn't the extension finding my bib file?". The Output panel can be accessed via `VSCode Top Menubar -> View -> Output` which will open a panel at the bottom. Select `PandocCiter` from the drop down list, and the extension's log should show up.
+- `PandocCiter.CitationFormat`
+    + Type: String array
+    + Function: Controls which bibtex fields will be shown in the suggestions window, along with their order
 
 ## Acknowledgements
 
