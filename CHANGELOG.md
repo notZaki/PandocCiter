@@ -1,5 +1,10 @@
 # Change Log
 
+## [0.9.0] - 2021-04-16
+
+- Use `documentation` instead of `detail` property for suggestions
+  + This should fix incorrect newlines in intellisense (issue #21)
+
 ## [0.8.0] - 2021-03-16
 
 - Add support for `Pweave Markdown` files
