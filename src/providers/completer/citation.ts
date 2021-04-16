@@ -32,7 +32,7 @@ import {bibtexParser} from 'latex-utensils';
 
 export interface Suggestion extends vscode.CompletionItem {
     key: string;
-    detail: string;
+    documentation: string;
     fields: {[key: string]: string};
     file: string;
     position: vscode.Position;
@@ -109,17 +109,27 @@ export class Citation {
                     file,
                     position: new vscode.Position(entry.location.start.line - 1, entry.location.start.column - 1),
                     kind: vscode.CompletionItemKind.Reference,
-                    detail: '',
+                    documentation: '',
                     fields: {}
                 };
-                entry.content.forEach(field => {
-                    const value = Array.isArray(field.value.content) ?
-                        field.value.content.join(' ') : this.deParenthesis(field.value.content);
-                    item.fields[field.name] = value;
-                    if (fields.includes(field.name.toLowerCase())) {
-                        item.detail += `${field.name.charAt(0).toUpperCase() + field.name.slice(1)}: ${value}\n`;
+                fields.forEach(field => {
+                    const fieldcontents = entry.content.filter(e => e.name === field)
+                    if (fieldcontents.length > 0) {
+                        const fieldcontent = fieldcontents[0]
+                        const value = Array.isArray(fieldcontent.value.content) ?
+                        fieldcontent.value.content.join(' ') : this.deParenthesis(fieldcontent.value.content);
+                        item.fields[fieldcontent.name] = value;
+                        item.documentation += `${fieldcontent.name.charAt(0).toUpperCase() + fieldcontent.name.slice(1)}: ${value}\n`;
                     }
-                });
+                })
+                // entry.content.forEach(field => {
+                //     const value = Array.isArray(field.value.content) ?
+                //         field.value.content.join(' ') : this.deParenthesis(field.value.content);
+                //     item.fields[field.name] = value;
+                //     if (fields.includes(field.name.toLowerCase())) {
+                //         item.detail += `${field.name.charAt(0).toUpperCase() + field.name.slice(1)}: ${value}\n`;
+                //     }
+                // });
                 this.bibEntries[file].push(item);
             });
         this.extension.log(`Parsed ${this.bibEntries[file].length} bib entries from ${file}.`);
