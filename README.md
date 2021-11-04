@@ -1,6 +1,6 @@
 # Pandoc Citer Extension for Visual Studio Code
 
-This extension provides autocompletion of citations stored in a bibtex file, for use with [pandoc-markdown](https://pandoc.org/) documents. 
+This extension provides autocompletion of citations stored in a bibtex file, for use with [pandoc-markdown](https://pandoc.org/) documents, along with auto-completion for [pandoc-crossref](https://github.com/lierdakil/pandoc-crossref) cross-references.
 
 ## Features
 
@@ -22,6 +22,9 @@ This extension provides autocompletion of citations stored in a bibtex file, for
 
 ### Configuration
 
+- `PandocCiter.CrossRefMode`
+    + Type: String, either "full" (default), "minimal", or "none"
+    + Function: This changes the detail shown during auto-completion of cross-references. Setting this to "none" will disable auto-completion of pandoc-crossref references.
 - `PandocCiter.ViewType`
     + Type: String, either "inline" (default) or "browser"
     + Function: Changes how the suggested citations are shown
@@ -48,5 +51,5 @@ This extension provides autocompletion of citations stored in a bibtex file, for
 
 ## Acknowledgements
 
-- This extension is essentially a stripped down version of the [LaTeX-Workshop extension](https://github.com/James-Yu/LaTeX-Workshop) that has been adjusted for markdown/pandoc
+- This extension started out as a a stripped down version of the [LaTeX-Workshop extension](https://github.com/James-Yu/LaTeX-Workshop) that has been adjusted for markdown/pandoc
     + The structure of the `src` directory was preserved, so that any updates/fixes here could also be ported to LaTex-Workshop, and vice versa

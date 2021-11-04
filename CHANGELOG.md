@@ -1,5 +1,9 @@
 # Change Log
 
+## [0.9.1] - 2021-11-03
+
+- Added support for pandoc-crossref crossreferences ( #26 - thanks to @yarray )
+
 ## [0.9.0] - 2021-04-16
 
 - Use `documentation` instead of `detail` property for suggestions
@@ -24,7 +28,7 @@
 
 ## [0.4.2] - 2020-03-11
 
-- Fix UseDefaultBib with relative path (#11 - @smartens)
+- Fix UseDefaultBib with relative path ( #11 - @smartens )
 
 ## [0.4.1] - 2019-11-16
 
