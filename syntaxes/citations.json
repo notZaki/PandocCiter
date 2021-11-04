@@ -21,6 +21,10 @@
             },
             "match": "(\\[)(-?@(.*?))(?=$|[\\s\\r\\n\\]{},~#%\\\\'\"=\\(\\)])",
             "name": "meta.paragraph.markdown"
+        },
+        "pandoc-crossref":{
+            "match": "\\@(fig|tbl|sec|eq|lst):\\w+",
+            "name": "string.other.link.description.markdown.citation"
         }
     },
     "scopeName": "pandoc-citation"

@@ -28,14 +28,17 @@ import * as vscode from 'vscode';
 
 import {Extension} from '../extension';
 import {Citation} from './completer/citation';
+import { Crossref } from './completer/crossref';
 
 export class Completer implements vscode.CompletionItemProvider {
     extension: Extension;
     citation: Citation;
+    crossref: Crossref;
 
     constructor(extension: Extension) {
         this.extension = extension;
         this.citation = new Citation(extension);
+        this.crossref = new Crossref(extension);
     }
 
     provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, _token: vscode.CancellationToken, context:vscode.CompletionContext) : 
@@ -44,15 +47,17 @@ export class Completer implements vscode.CompletionItemProvider {
         // Some user-configs will execute this function for each typed character. Terminate those calls early.
         if (invoker !== '@') {return;}
         const line = document.lineAt(position.line).text.substr(0, position.character).trim().split(" ");
-        const suggestions = this.completion(line[line.length-1]);
+        const trigger = line[line.length-1];
+        const suggestions = this.completion(trigger).concat(this.completionCrossref(trigger, document));
         this.extension.log(`Showing ${suggestions.length} suggestions`);
-            if (suggestions.length > 0) {
-                const configuration = vscode.workspace.getConfiguration('PandocCiter');
-                if (configuration.get('ViewType') as string === 'browser') {
-                    setTimeout(() => this.citation.browser(), 10);
-                    return;
-                }            
-                return suggestions;
+        if (suggestions.length > 0) {
+            const configuration = vscode.workspace.getConfiguration('PandocCiter');
+            if ((configuration.get('ViewType') as string) === 'browser') {
+                setTimeout(() => this.citation.browser(), 10);
+                return;
+            }
+            // current crossref do not support browser mode
+            return suggestions;
         }
         return;
     }
@@ -66,6 +71,11 @@ export class Completer implements vscode.CompletionItemProvider {
         if (result) {
             suggestions = provider.provide();
         }
+
         return suggestions;
+    }
+
+    completionCrossref(line: string, doc: vscode.TextDocument) : vscode.CompletionItem[] {
+        return this.crossref.provide({document: doc});
     }
 }
