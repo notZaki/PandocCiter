@@ -30,7 +30,7 @@ export class HoverProvider implements vscode.HoverProvider {
 
 		if (cite) {
 			let md = cite.documentation || cite.detail;
-			md = md.replace(/\n/g, '\n\n'); // need double newlines for the formatting to work in markdown?
+			md = md.replace(/\n/g, '  \n'); // need double space then a newline to actually get a newline in markdown
 			if (md) {
 				return new vscode.Hover(md)
 			}
