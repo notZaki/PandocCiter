@@ -4,6 +4,7 @@ import * as vscode from 'vscode';
 
 import {Manager} from './components/manager';
 import {Completer} from './providers/completion';
+import {HoverProvider} from './providers/hover'
 
 export function activate(context: vscode.ExtensionContext) {
     const extension = new Extension();
@@ -40,16 +41,28 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(vscode.languages.registerCompletionItemProvider(
         {scheme: 'file', language: 'pweave_md'}, 
         extension.completer, '@'));
+
+    context.subscriptions.push(vscode.languages.registerHoverProvider(
+        {scheme: 'file', language: 'markdown'}, 
+        extension.hover));
+    context.subscriptions.push(vscode.languages.registerHoverProvider(
+        {scheme: 'file', language: 'rmd'}, 
+        extension.hover));
+    context.subscriptions.push(vscode.languages.registerHoverProvider(
+        {scheme: 'file', language: 'pweave_md'}, 
+        extension.hover));
 }
 
 export class Extension {
     manager: Manager;
     completer: Completer;
+    hover: HoverProvider;
     logPanel: vscode.OutputChannel;
 
     constructor() {
         this.manager = new Manager(this);
         this.completer = new Completer(this);
+        this.hover = new HoverProvider(this);
         this.logPanel = vscode.window.createOutputChannel('PandocCiter');
         this.log(`PandocCiter is now activated`);
     }

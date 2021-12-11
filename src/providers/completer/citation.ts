@@ -135,6 +135,12 @@ export class Citation {
         this.extension.log(`Parsed ${this.bibEntries[file].length} bib entries from ${file}.`);
     }
 
+    getEntry(key: string): Suggestion | undefined {
+        const suggestions = this.updateAll()
+        const entry = suggestions.find((elm) => elm.key === key)
+        return entry
+    }
+
     private deParenthesis(str: string) {
         return str.replace(/{+([^\\{}]+)}+/g, '$1');
     }
