@@ -20,7 +20,7 @@ This extension provides autocompletion of citations stored in a bibtex file, for
     - The path/to/.bib can be either a relative or absolute path
     - Multiple bib files can be included if separated by comma, e.g. `[path/to/refsA.bib, path/to/refsB.bib]`
 
-### Configuration
+## Configuration
 
 - `PandocCiter.CrossRefMode`
     + Type: String, either "full" (default), "minimal", or "none"
@@ -53,3 +53,8 @@ This extension provides autocompletion of citations stored in a bibtex file, for
 
 - This extension started out as a a stripped down version of the [LaTeX-Workshop extension](https://github.com/James-Yu/LaTeX-Workshop) that has been adjusted for markdown/pandoc
     + The structure of the `src` directory was preserved, so that any updates/fixes here could also be ported to LaTex-Workshop, and vice versa
+- Contributors:
+    - @smartens - bug fixes
+    - @yarray - adding pandoc-crossref support
+    - @Dominic-DallOsto - adding hover and go-to-definition support
+    

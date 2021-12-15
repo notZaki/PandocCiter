@@ -1,5 +1,11 @@
 # Change Log
 
+## [0.9.2] - 2021-12-15
+
+- Hovering and go-to support ( #29 - thanks to @Dominic-DallOsto )
+  - Hovering over a citation will now show relevant information (e.g. author & title)
+  - Ctrl+clicking a citation will now open the bibtex file and go to the line where the entry was defined
+
 ## [0.9.1] - 2021-11-03
 
 - Added support for pandoc-crossref crossreferences ( #26 - thanks to @yarray )
