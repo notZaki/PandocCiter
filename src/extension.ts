@@ -32,7 +32,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
     }));
 
-    const selector = ['markdown','rmd','pweave_md'].map((language)=>{
+    const selector = ['markdown','rmd','pweave_md','quarto'].map((language)=>{
         return {scheme: 'file', language: language};
     });
 

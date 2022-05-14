@@ -1,5 +1,9 @@
 # Change Log
 
+## [0.9.3] - 2022-05-14
+
+- Added support for citations in quarto[https://marketplace.visualstudio.com/items?itemName=quarto.quarto] documents
+
 ## [0.9.2] - 2021-12-15
 
 - Hovering and go-to support ( #29 - thanks to @Dominic-DallOsto )
