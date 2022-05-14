@@ -1,5 +1,10 @@
 # Change Log
 
+## [0.9.4] - 2022-05-15
+
+- The bibliography paths in the YAML header no longer need to be enclosed in square brackets (issue #32)
+- The `DefaultBib` configuration now supports multi-root workspaces (issue #31)
+
 ## [0.9.3] - 2022-05-14
 
 - Added support for citations in quarto[https://marketplace.visualstudio.com/items?itemName=quarto.quarto] documents
