@@ -42,6 +42,10 @@ export class Manager {
     }
 
     findBib() : void {
+        const docURI = vscode.window.activeTextEditor!.document.uri;
+        const configuration = vscode.workspace.getConfiguration('PandocCiter', docURI);
+        const rootFolder = vscode.workspace.getWorkspaceFolder(docURI).uri.fsPath;
+        
         const bibRegex = /^bibliography:\s* \[(.*)\]/m;
         const activeText = vscode.window.activeTextEditor!.document.getText();
         let bibresult = activeText.match(bibRegex);
@@ -50,17 +54,17 @@ export class Manager {
             const bibFiles = bibresult[1].split(',').map(item => item.trim());
             for (let i in bibFiles) {
                 let bibFile = this.stripQuotes(bibFiles[i]);
-                bibFile = this.resolveBibFile(bibFile);
+                bibFile = this.resolveBibFile(bibFile, rootFolder);
                 this.extension.log(`Looking for .bib file: ${bibFile}`);
                 this.addBibToWatcher(bibFile);
                 foundFiles.push(bibFile);
             }
         }
-        const configuration = vscode.workspace.getConfiguration('PandocCiter');
-        if (configuration.get('RootFile') !== "") {
-            let curInput = path.join(configuration.get('RootFile'));
+        const rootfile: string = configuration.get('RootFile')
+        if (rootfile !== "") {
+            let curInput = path.join(rootfile);
             if (!path.isAbsolute(curInput)) { 
-                curInput = path.join(vscode.workspace.rootPath, configuration.get('RootFile'));
+                curInput = path.join(rootFolder, rootfile);
             }
             var rootText = fs.readFileSync(curInput,'utf8');
             bibresult = rootText.match(bibRegex);
@@ -68,7 +72,7 @@ export class Manager {
                 const bibFiles = bibresult[1].split(',').map(item => item.trim());
                 for (let i in bibFiles) {
                     let bibFile = path.join(path.dirname(curInput), bibFiles[i]);
-                    bibFile = this.resolveBibFile(bibFile);
+                    bibFile = this.resolveBibFile(bibFile, rootFolder);
                     this.extension.log(`Looking for .bib file: ${bibFile}`);
                     this.addBibToWatcher(bibFile);
                     foundFiles.push(bibFile);
@@ -77,7 +81,7 @@ export class Manager {
         }
         if (configuration.get('UseDefaultBib') && (configuration.get('DefaultBib') !== "")) {
             let bibFile = path.join(configuration.get('DefaultBib'));
-            bibFile = this.resolveBibFile(bibFile, true);
+            bibFile = this.resolveBibFile(bibFile, rootFolder);
             this.extension.log(`Looking for .bib file: ${bibFile}`);
             this.addBibToWatcher(bibFile);
             foundFiles.push(bibFile);
@@ -99,13 +103,11 @@ export class Manager {
         }
     }
 
-    resolveBibFile(bibFile: string, useWorkspaceFolder?: boolean) {
+    resolveBibFile(bibFile: string, rootFolder: string) {
         if (path.isAbsolute(bibFile)) {
             return bibFile;
-        } else if (useWorkspaceFolder) { 
-            return path.resolve(vscode.workspace.rootPath, bibFile);
-        } else {
-            return path.resolve(path.dirname(vscode.window.activeTextEditor!.document.fileName), bibFile);
+        } else { 
+            return path.resolve(path.join(rootFolder, bibFile));
         }
     }
 

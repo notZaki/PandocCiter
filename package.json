@@ -2,7 +2,7 @@
     "name": "pandocciter",
     "displayName": "Pandoc Citer",
     "description": "Autocomplete bibtex citations for markdown/pandoc",
-    "version": "0.9.3",
+    "version": "0.9.4",
     "publisher": "notZaki",
     "license": "MIT",
     "engines": {
@@ -54,6 +54,7 @@
                 "PandocCiter.RootFile": {
                     "type": "string",
                     "default": "",
+                    "scope": "resource",
                     "description": "Main document containing YAML for bibliography"
                 },
                 "PandocCiter.ShowLog": {
@@ -64,11 +65,13 @@
                 "PandocCiter.DefaultBib": {
                     "type": "string",
                     "default": "",
+                    "scope": "resource",
                     "description": "Path to default bib file"
                 },
                 "PandocCiter.UseDefaultBib": {
                     "type": "boolean",
                     "default": true,
+                    "scope": "resource",
                     "description": "Whether to use the Default Bib"
                 },
                 "PandocCiter.ForgetUnusedBib": {
