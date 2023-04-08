@@ -10,7 +10,7 @@ export class HoverProvider implements vscode.HoverProvider {
 
 	public async provideHover(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): Promise<vscode.Hover | undefined> {
 		// a cite key is an @ symbol followed by word characters (letters or numbers)
-		const keyRange = document.getWordRangeAtPosition(position, /(?<=@)\w+/);
+		const keyRange = document.getWordRangeAtPosition(position, /(?<=@)[\w\p{L}\p{M}]+/u);
 		if (keyRange){
 			const citeKey = document.getText(keyRange);
 			const cite = this.extension.completer.citation.getEntry(citeKey);
