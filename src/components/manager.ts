@@ -47,7 +47,7 @@ export class Manager {
 
         const docURI = vscode.window.activeTextEditor!.document.uri;
         const configuration = vscode.workspace.getConfiguration('PandocCiter', docURI);
-        const rootFolder = vscode.workspace.getWorkspaceFolder(docURI).uri.fsPath;
+        const rootFolder = vscode.workspace.getWorkspaceFolder(docURI)?.uri.fsPath;
         
         const activeText = vscode.window.activeTextEditor!.document.getText();
         const yamltext = activeText.match(/---\r?\n((.+\r?\n)+)---/gm)
@@ -66,7 +66,7 @@ export class Manager {
         const rootfile: string = configuration.get('RootFile')
         if (rootfile !== "") {
             let curInput = path.join(rootfile);
-            if (!path.isAbsolute(curInput)) { 
+            if (!path.isAbsolute(curInput) && rootFolder) { 
                 curInput = path.join(rootFolder, rootfile);
             }
             const rootText = fs.readFileSync(curInput,'utf8');
@@ -116,8 +116,10 @@ export class Manager {
     resolveBibFile(bibFile: string, rootFolder: string) {
         if (path.isAbsolute(bibFile)) {
             return bibFile;
-        } else { 
+        } else if (rootFolder) { 
             return path.resolve(path.join(rootFolder, bibFile));
+        } else {
+            return path.resolve(path.dirname(vscode.window.activeTextEditor!.document.fileName), bibFile)
         }
     }
 

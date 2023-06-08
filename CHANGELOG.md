@@ -1,5 +1,9 @@
 # Change Log
 
+## [0.10.1] - 2023-06-08
+
+- Try to fix citation autocompletion not showing up if a workspace is not loaded
+
 ## [0.10.0] - 2023-06-07
 
 - The bibliography paths in the YAML header no longer need to be enclosed in square brackets (issue #32)
