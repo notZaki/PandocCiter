@@ -50,10 +50,8 @@ export class Citation {
     provide(args?: {document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext}): vscode.CompletionItem[] {
         // Compile the suggestion array to vscode completion array
         return this.updateAll().map(item => {
-            item.filterText = `${item.key} ${item.fields.author} ${item.fields.title} ${item.fields.journal}`;
+            item.filterText = Object.values(item.fields).join(" ")
             item.insertText = item.key;
-            // Documentation seems unnecessary (it is only duplicate of detail)
-            // item.documentation = item.detail;
             if (args) {
                 item.range = args.document.getWordRangeAtPosition(args.position, /[-a-zA-Z0-9_:.]+/);
             }
