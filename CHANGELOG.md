@@ -1,6 +1,6 @@
 # Change Log
 
-## [0.10.0] - 2022-06-07
+## [0.10.0] - 2023-06-07
 
 - The bibliography paths in the YAML header no longer need to be enclosed in square brackets (issue #32)
 - The `DefaultBib` configuration now supports multi-root workspaces (issue #31)
