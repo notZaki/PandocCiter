@@ -43,21 +43,25 @@ export class Manager {
     }
 
     findBib() : void {
+        let foundFiles: string[] = [];
+
         const docURI = vscode.window.activeTextEditor!.document.uri;
         const configuration = vscode.workspace.getConfiguration('PandocCiter', docURI);
         const rootFolder = vscode.workspace.getWorkspaceFolder(docURI).uri.fsPath;
         
         const activeText = vscode.window.activeTextEditor!.document.getText();
         const yamltext = activeText.match(/---\r?\n((.+\r?\n)+)---/gm)
-        const bibInYaml = yaml.loadAll(yamltext)[0].bibliography
-        const bibFiles = (bibInYaml instanceof Array ? bibInYaml : [bibInYaml]);
-        let foundFiles: string[] = [];
-        for (let i in bibFiles) {
-            let bibFile = this.stripQuotes(bibFiles[i]);
-            bibFile = this.resolveBibFile(bibFile, rootFolder);
-            this.extension.log(`Looking for .bib file: ${bibFile}`);
-            this.addBibToWatcher(bibFile);
-            foundFiles.push(bibFile);
+        const parsedyaml = yaml.loadAll(yamltext)[0]
+        if (parsedyaml && parsedyaml.bibliography) {
+            const bibInYaml = yaml.loadAll(yamltext)[0].bibliography
+            const bibFiles = (bibInYaml instanceof Array ? bibInYaml : [bibInYaml]);
+            for (let i in bibFiles) {
+                let bibFile = this.stripQuotes(bibFiles[i]);
+                bibFile = this.resolveBibFile(bibFile, rootFolder);
+                this.extension.log(`Looking for .bib file: ${bibFile}`);
+                this.addBibToWatcher(bibFile);
+                foundFiles.push(bibFile);
+            }
         }
         const rootfile: string = configuration.get('RootFile')
         if (rootfile !== "") {
