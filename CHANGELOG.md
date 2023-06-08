@@ -6,6 +6,7 @@
 - The `DefaultBib` configuration now supports multi-root workspaces (issue #31)
 - Add initial support for CSL JSON files (issue #34)
 - The fields specified by the `PandocCiter.CitationFormat` configuration will be used to filter suggestions (issue #33)
+- Add a new config `PandocCiter.DefaultBibs` which accepts a list of files (issue #18)
 
 ## [0.9.3] - 2022-05-14
 

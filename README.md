@@ -31,10 +31,12 @@ This extension provides autocompletion of citations stored in a bibtex file, for
 - `PandocCiter.RootFile`
     + Type: String, path to markdown file
     + Function: This is useful if there are multiple markdown files with one external master file containing the YAML header with the `bibliography: [path/to/bib]` entry. This avoids having to insert the bibliography YAML header into each individual file. 
-- `PandocCiter.DefaultBib`
-    + Type: String, absolute or relative path to bib file
+- `PandocCiter.DefaultBibs`
+    + Type: Array of Strings, absolute or relative path to bib file
         - Note: For relative paths, it will be assumed that the path is relative to the workspace folder
     + Function: This is useful if there is a default bib file that is preferred for all projects. This bib file will be loaded regardless of whether or not a YAML entry is included.
+- `PandocCiter.DefaultBib`
+    + Same as `PandocCiter.DefaultBibs`, except this is older and only accepts a single path as a string. Not recommended for new users. This only exists to avoid breaking older setups.
 - `PandocCiter.UseDefaultBib`
     + Type: Boolean, default is `true`
     + Function: This should be a project-specific setting. It is useful when a DefaultBib is defined but you don't want it to be used for a specific project.

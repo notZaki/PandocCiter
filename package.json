@@ -68,6 +68,12 @@
                     "scope": "resource",
                     "description": "Path to default bib file"
                 },
+                "PandocCiter.DefaultBibs": {
+                    "type": "array",
+                    "default": [],
+                    "scope": "resource",
+                    "description": "Path to default bib files"
+                },
                 "PandocCiter.UseDefaultBib": {
                     "type": "boolean",
                     "default": true,

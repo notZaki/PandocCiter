@@ -80,12 +80,21 @@ export class Manager {
                 foundFiles.push(bibFile);
             }
         }
-        if (configuration.get('UseDefaultBib') && (configuration.get('DefaultBib') !== "")) {
+        if (configuration.get('UseDefaultBib') && (configuration.get('DefaultBib'))) {
             let bibFile = path.join(configuration.get('DefaultBib'));
             bibFile = this.resolveBibFile(bibFile, rootFolder);
             this.extension.log(`Looking for file: ${bibFile}`);
             this.addBibToWatcher(bibFile);
             foundFiles.push(bibFile);
+        }
+        if (configuration.get('UseDefaultBib') && (configuration.get('DefaultBibs'))) {
+            let bibFiles: string[] = configuration.get('DefaultBibs');
+            bibFiles.forEach(element => {
+                let bibFile = this.resolveBibFile(path.join(element), rootFolder);
+                this.extension.log(`Looking for file: ${bibFile}`);
+                this.addBibToWatcher(bibFile);
+                foundFiles.push(bibFile); 
+            });
         }
         let watched_but_not_found = this.watched.filter(e => !foundFiles.includes(e));
         if (configuration.get('ForgetUnusedBib')) {
