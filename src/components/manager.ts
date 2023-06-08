@@ -44,12 +44,26 @@ export class Manager {
 
     findBib() : void {
         let foundFiles: string[] = [];
+        const activeText = vscode.window.activeTextEditor!.document.getText();
+        
+        // Re-use the old reg-ex approach in case the yaml parser fails
+        const bibRegex = /^bibliography:\s* \[(.*)\]/m;
+        let bibresult = activeText.match(bibRegex);
+        if (bibresult) {
+            const bibFiles = bibresult[1].split(',').map(item => item.trim());
+            for (let i in bibFiles) {
+                let bibFile = this.stripQuotes(bibFiles[i]);
+                bibFile = this.resolveBibFile(bibFile, undefined);
+                this.extension.log(`Looking for .bib file: ${bibFile}`);
+                this.addBibToWatcher(bibFile);
+                foundFiles.push(bibFile);
+            }
+        }
 
+        // This is the newer approach using yaml-js
         const docURI = vscode.window.activeTextEditor!.document.uri;
         const configuration = vscode.workspace.getConfiguration('PandocCiter', docURI);
         const rootFolder = vscode.workspace.getWorkspaceFolder(docURI)?.uri.fsPath;
-        
-        const activeText = vscode.window.activeTextEditor!.document.getText();
         const yamltext = activeText.match(/---\r?\n((.+\r?\n)+)---/gm)
         const parsedyaml = yaml.loadAll(yamltext)[0]
         if (parsedyaml && parsedyaml.bibliography) {

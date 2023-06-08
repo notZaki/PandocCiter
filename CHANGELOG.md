@@ -1,5 +1,9 @@
 # Change Log
 
+## [0.10.2] - 2023-06-08
+
+- Try to load bib files similar to v0.9.3 because the newer versions are not working for some users (issue #41)
+
 ## [0.10.1] - 2023-06-08
 
 - Try to fix citation autocompletion not showing up if a workspace is not loaded
