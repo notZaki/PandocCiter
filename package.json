@@ -2,7 +2,7 @@
     "name": "pandocciter",
     "displayName": "Pandoc Citer",
     "description": "Autocomplete bibtex citations for markdown/pandoc",
-    "version": "0.9.3",
+    "version": "0.10.0",
     "publisher": "notZaki",
     "license": "MIT",
     "engines": {
@@ -54,6 +54,7 @@
                 "PandocCiter.RootFile": {
                     "type": "string",
                     "default": "",
+                    "scope": "resource",
                     "description": "Main document containing YAML for bibliography"
                 },
                 "PandocCiter.ShowLog": {
@@ -64,11 +65,13 @@
                 "PandocCiter.DefaultBib": {
                     "type": "string",
                     "default": "",
+                    "scope": "resource",
                     "description": "Path to default bib file"
                 },
                 "PandocCiter.UseDefaultBib": {
                     "type": "boolean",
                     "default": true,
+                    "scope": "resource",
                     "description": "Whether to use the Default Bib"
                 },
                 "PandocCiter.ForgetUnusedBib": {
@@ -82,6 +85,7 @@
                         "author",
                         "title",
                         "journal",
+                        "container-title",
                         "publisher",
                         "booktitle",
                         "year"
@@ -108,13 +112,15 @@
         "test": "npm run compile && node ./node_modules/vscode/bin/test"
     },
     "dependencies": {
-        "chokidar": "^3.5.1",
-        "latex-utensils": "^4.0.0"
+        "chokidar": "^3.5.3",
+        "latex-utensils": "^6.1.0",
+        "js-yaml": "^4"
+
     },
     "devDependencies": {
-        "@types/node": "^14.14.0",
-        "eslint": "^7.22.0",
-        "typescript": "^4.2.3",
-        "@types/vscode": "^1.50.0"
+        "@types/node": "^20.2.5",
+        "eslint": "^8.42.0",
+        "typescript": "^5.1.3",
+        "@types/vscode": "^1.78.1"
     }
 }

@@ -1,5 +1,12 @@
 # Change Log
 
+## [0.10.0] - 2022-06-07
+
+- The bibliography paths in the YAML header no longer need to be enclosed in square brackets (issue #32)
+- The `DefaultBib` configuration now supports multi-root workspaces (issue #31)
+- Add initial support for CSL JSON files (issue #34)
+- The fields specified by the `PandocCiter.CitationFormat` configuration will be used to filter suggestions (issue #33)
+
 ## [0.9.3] - 2022-05-14
 
 - Added support for citations in quarto[https://marketplace.visualstudio.com/items?itemName=quarto.quarto] documents

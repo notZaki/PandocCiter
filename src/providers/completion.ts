@@ -43,10 +43,10 @@ export class Completer implements vscode.CompletionItemProvider {
 
     provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, _token: vscode.CancellationToken, context:vscode.CompletionContext) : 
     vscode.CompletionItem[] | undefined {
-        const invoker = document.lineAt(position.line).text[position.character-1];
-        // Some user-configs will execute this function for each typed character. Terminate those calls early.
-        if (invoker !== '@') {return;}
-        const line = document.lineAt(position.line).text.substr(0, position.character).trim().split(" ");
+        // This was used to terminate unecessary autompletion early, but might be causing suggestions to not appear for some users
+        // const invoker = document.lineAt(position.line).text[position.character-1];
+        // if (invoker !== '@') {return;}
+        const line = document.lineAt(position.line).text.substring(0, position.character).trim().split(" ");
         const trigger = line[line.length-1];
         const suggestions = this.completion(trigger).concat(this.completionCrossref(trigger, document));
         this.extension.log(`Showing ${suggestions.length} suggestions`);

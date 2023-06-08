@@ -28,6 +28,7 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as chokidar from 'chokidar';
+import yaml = require('js-yaml');
 
 import {Extension} from '../extension';
 
@@ -42,43 +43,47 @@ export class Manager {
     }
 
     findBib() : void {
-        const bibRegex = /^bibliography:\s* \[(.*)\]/m;
-        const activeText = vscode.window.activeTextEditor!.document.getText();
-        let bibresult = activeText.match(bibRegex);
         let foundFiles: string[] = [];
-        if (bibresult) {
-            const bibFiles = bibresult[1].split(',').map(item => item.trim());
+
+        const docURI = vscode.window.activeTextEditor!.document.uri;
+        const configuration = vscode.workspace.getConfiguration('PandocCiter', docURI);
+        const rootFolder = vscode.workspace.getWorkspaceFolder(docURI).uri.fsPath;
+        
+        const activeText = vscode.window.activeTextEditor!.document.getText();
+        const yamltext = activeText.match(/---\r?\n((.+\r?\n)+)---/gm)
+        const parsedyaml = yaml.loadAll(yamltext)[0]
+        if (parsedyaml && parsedyaml.bibliography) {
+            const bibInYaml = yaml.loadAll(yamltext)[0].bibliography
+            const bibFiles = (bibInYaml instanceof Array ? bibInYaml : [bibInYaml]);
             for (let i in bibFiles) {
                 let bibFile = this.stripQuotes(bibFiles[i]);
-                bibFile = this.resolveBibFile(bibFile);
-                this.extension.log(`Looking for .bib file: ${bibFile}`);
+                bibFile = this.resolveBibFile(bibFile, rootFolder);
+                this.extension.log(`Looking for file: ${bibFile}`);
                 this.addBibToWatcher(bibFile);
                 foundFiles.push(bibFile);
             }
         }
-        const configuration = vscode.workspace.getConfiguration('PandocCiter');
-        if (configuration.get('RootFile') !== "") {
-            let curInput = path.join(configuration.get('RootFile'));
+        const rootfile: string = configuration.get('RootFile')
+        if (rootfile !== "") {
+            let curInput = path.join(rootfile);
             if (!path.isAbsolute(curInput)) { 
-                curInput = path.join(vscode.workspace.rootPath, configuration.get('RootFile'));
+                curInput = path.join(rootFolder, rootfile);
             }
-            var rootText = fs.readFileSync(curInput,'utf8');
-            bibresult = rootText.match(bibRegex);
-            if (bibresult) {
-                const bibFiles = bibresult[1].split(',').map(item => item.trim());
-                for (let i in bibFiles) {
-                    let bibFile = path.join(path.dirname(curInput), bibFiles[i]);
-                    bibFile = this.resolveBibFile(bibFile);
-                    this.extension.log(`Looking for .bib file: ${bibFile}`);
-                    this.addBibToWatcher(bibFile);
-                    foundFiles.push(bibFile);
-                }
+            const rootText = fs.readFileSync(curInput,'utf8');
+            const bibInYaml = yaml.loadAll(rootText)[0].bibliography
+            const bibFiles = (bibInYaml instanceof Array ? bibInYaml : [bibInYaml]);
+            for (let i in bibFiles) {
+                let bibFile = path.join(path.dirname(curInput), bibFiles[i]);
+                bibFile = this.resolveBibFile(bibFile, rootFolder);
+                this.extension.log(`Looking for file: ${bibFile}`);
+                this.addBibToWatcher(bibFile);
+                foundFiles.push(bibFile);
             }
         }
         if (configuration.get('UseDefaultBib') && (configuration.get('DefaultBib') !== "")) {
             let bibFile = path.join(configuration.get('DefaultBib'));
-            bibFile = this.resolveBibFile(bibFile, true);
-            this.extension.log(`Looking for .bib file: ${bibFile}`);
+            bibFile = this.resolveBibFile(bibFile, rootFolder);
+            this.extension.log(`Looking for file: ${bibFile}`);
             this.addBibToWatcher(bibFile);
             foundFiles.push(bibFile);
         }
@@ -99,27 +104,25 @@ export class Manager {
         }
     }
 
-    resolveBibFile(bibFile: string, useWorkspaceFolder?: boolean) {
+    resolveBibFile(bibFile: string, rootFolder: string) {
         if (path.isAbsolute(bibFile)) {
             return bibFile;
-        } else if (useWorkspaceFolder) { 
-            return path.resolve(vscode.workspace.rootPath, bibFile);
-        } else {
-            return path.resolve(path.dirname(vscode.window.activeTextEditor!.document.fileName), bibFile);
+        } else { 
+            return path.resolve(path.join(rootFolder, bibFile));
         }
     }
 
     addBibToWatcher(bibPath: string) {
-        if (path.extname(bibPath) === '') {
-            bibPath += '.bib';
+        if (!fs.existsSync(bibPath) && fs.existsSync(bibPath + '.json')) {
+            bibPath += '.json';
         }
         if (!fs.existsSync(bibPath) && fs.existsSync(bibPath + '.bib')) {
             bibPath += '.bib';
         }
         if (fs.existsSync(bibPath)) {
-            this.extension.log(`Found .bib file ${bibPath}`);
+            this.extension.log(`Found file ${bibPath}`);
             if (this.bibWatcher === undefined) {
-                this.extension.log(`Creating file watcher for .bib files.`);
+                this.extension.log(`Creating file watcher for files.`);
                 this.bibWatcher = chokidar.watch(bibPath, {awaitWriteFinish: true});
                 this.bibWatcher.on('change', (filePath: string) => {
                     this.extension.log(`Bib file watcher - responding to change in ${filePath}`);
@@ -133,12 +136,12 @@ export class Manager {
                 });
                 this.extension.completer.citation.parseBibFile(bibPath);
             } else if (this.watched.indexOf(bibPath) < 0) {
-                this.extension.log(`Adding .bib file ${bibPath} to bib file watcher.`);
+                this.extension.log(`Adding file ${bibPath} to bib file watcher.`);
                 this.bibWatcher.add(bibPath);
                 this.watched.push(bibPath);
                 this.extension.completer.citation.parseBibFile(bibPath);
             } else {
-                this.extension.log(`.bib file ${bibPath} is already being watched.`);
+                this.extension.log(`bib file ${bibPath} is already being watched.`);
             }
         }
     }
