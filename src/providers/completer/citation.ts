@@ -24,6 +24,7 @@
 // SOFTWARE.
 
 import * as vscode from 'vscode';
+import * as path from 'path';
 import * as fs from 'fs';
 
 import {Extension} from '../../extension';
@@ -35,7 +36,7 @@ export interface Suggestion extends vscode.CompletionItem {
     documentation: string;
     fields: {[key: string]: string};
     file: string;
-    position: vscode.Position;
+    position: vscode.Position; // Unnecessary?
 }
 
 export class Citation {
@@ -91,7 +92,58 @@ export class Citation {
         });
     }
 
-    parseBibFile(file: string) {
+    parseBibFile(file:string) {
+        const ext = path.extname(file)
+        if (ext == ".bib") {
+            this.parseBibtexFile(file)
+        } else if (ext == ".json") {
+            this.parseBibjsonFile(file)
+        } else {
+            this.extension.log(`Unknown file extension force: ${file}`);
+        }
+    }
+
+    parseBibjsonFile(file: string) {
+        const fields: string[] = (vscode.workspace.getConfiguration('PandocCiter').get('CitationFormat') as string[]).map(f => { return f.toLowerCase(); });
+        this.extension.log(`Parsing .bib entries from ${file}`);
+        this.bibEntries[file] = [];
+        let json = JSON.parse(fs.readFileSync(file, "utf-8"));
+        json.forEach((entry) => {
+            const item: Suggestion = {
+                key: entry.id,
+                label: entry.id,
+                file,
+                position: new vscode.Position(0, 0),
+                kind: vscode.CompletionItemKind.Reference,
+                documentation: '',
+                fields: {}
+            }
+            if (entry.author) {
+                entry.author.forEach(element => {
+                    if (item.fields.author) {
+                        item.fields.author += " and "
+                    } else {
+                        item.fields.author = ""
+                    }
+                    item.fields.author += Object.values(element).join(", ")
+                });
+                item.documentation += `author: ${item.fields.author}\n`
+            }
+            if (entry.issued) {
+                item.documentation += `date: ${Object.values(entry.issued).join()}\n`
+            }
+            fields.forEach(field => {
+                if (entry[field] && !item.fields[field]) {
+                    item.fields[field] = entry[field]
+                    item.documentation += `${field}: ${item.fields[field]}\n`
+                }
+            })
+            this.bibEntries[file].push(item);
+        })
+        this.extension.log(`Parsed ${this.bibEntries[file].length} bib entries from ${file}.`);
+    }
+    
+    parseBibtexFile(file: string) {
         const fields: string[] = (vscode.workspace.getConfiguration('PandocCiter').get('CitationFormat') as string[]).map(f => { return f.toLowerCase(); });
         this.extension.log(`Parsing .bib entries from ${file}`);
         this.bibEntries[file] = [];
@@ -122,14 +174,6 @@ export class Citation {
                         item.documentation += `${fieldcontent.name.charAt(0).toUpperCase() + fieldcontent.name.slice(1)}: ${value}\n`;
                     }
                 })
-                // entry.content.forEach(field => {
-                //     const value = Array.isArray(field.value.content) ?
-                //         field.value.content.join(' ') : this.deParenthesis(field.value.content);
-                //     item.fields[field.name] = value;
-                //     if (fields.includes(field.name.toLowerCase())) {
-                //         item.detail += `${field.name.charAt(0).toUpperCase() + field.name.slice(1)}: ${value}\n`;
-                //     }
-                // });
                 this.bibEntries[file].push(item);
             });
         this.extension.log(`Parsed ${this.bibEntries[file].length} bib entries from ${file}.`);
