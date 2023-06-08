@@ -47,14 +47,15 @@ This extension provides autocompletion of citations stored in a bibtex file, for
     + Function: This will show a log in the Output panel, useful for answering questions like "Why isn't the extension finding my bib file?". The Output panel can be accessed via `VSCode Top Menubar -> View -> Output` which will open a panel at the bottom. Select `PandocCiter` from the drop down list, and the extension's log should show up.
 - `PandocCiter.CitationFormat`
     + Type: String array
-    + Function: Controls which bibtex fields will be shown in the suggestions window, along with their order
+    + Function: Controls which bibtex fields will be shown in the suggestions window. These items will also be used to filter the suggestions during autocompletion.
 
 ## Acknowledgements
 
 - This extension started out as a a stripped down version of the [LaTeX-Workshop extension](https://github.com/James-Yu/LaTeX-Workshop) that has been adjusted for markdown/pandoc
     + The structure of the `src` directory was preserved, so that any updates/fixes here could also be ported to LaTex-Workshop, and vice versa
 - Contributors:
-    - @smartens - bug fixes
-    - @yarray - adding pandoc-crossref support
-    - @Dominic-DallOsto - adding hover and go-to-definition support
+    - [@smartens](https://github.com/smartens) - fixing bugs
+    - [@yarray](https://github.com/yarray) - adding pandoc-crossref support
+    - [@Dominic-DallOsto](https://github.com/Dominic-DallOsto) - adding hover and go-to-definition support
+    - [@MaxChang3](https://github.com/MaxChang3) - improving hover support
     
