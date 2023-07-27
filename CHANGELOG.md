@@ -1,5 +1,9 @@
 # Change Log
 
+## [0.10.3] - 2023-07-27
+
+- Citations entered from bibjson will have an editor and a clickable url/DOI on hover (PR #43 - thanks to @adunning)
+
 ## [0.10.2] - 2023-06-08
 
 - Try to load bib files similar to v0.9.3 because the newer versions are not working for some users (issue #41)
@@ -33,7 +37,7 @@
 ## [0.9.0] - 2021-04-16
 
 - Use `documentation` instead of `detail` property for suggestions
-  + This should fix incorrect newlines in intellisense (issue #21)
+  - This should fix incorrect newlines in intellisense (issue #21)
 
 ## [0.8.0] - 2021-03-16
 
@@ -59,9 +63,9 @@
 ## [0.4.1] - 2019-11-16
 
 - Added a config option which can disable the 'forgetting' feature added in 0.4.0
-    + For example, if a project has multiple markdown files where the bibliography should be shared but only one file has a YAML header, then setting `PandocCiter.ForgetUnusedBib: false` will allow the citation suggestions to appear in all of the markdown files.
-- Added a language check when the text editor is changed. 
-   + Otherwise, the extension forgets all of the citations whenever a non-markdown file was opened which is unnecessary. 
+  - For example, if a project has multiple markdown files where the bibliography should be shared but only one file has a YAML header, then setting `PandocCiter.ForgetUnusedBib: false` will allow the citation suggestions to appear in all of the markdown files.
+- Added a language check when the text editor is changed.
+  - Otherwise, the extension forgets all of the citations whenever a non-markdown file was opened which is unnecessary.
 
 ## [0.4.0] - 2019-11-16
 
@@ -79,8 +83,8 @@
 ## [0.3.6] - 2019-03-06
 
 - The completion provider terminates itself if it isn't triggered by an `@`.
-    + The completion provider was being executed for any typed character because intellisense is aggressive by default. Although not a big deal, it does mean that unnecessary computations are done for each keystroke. This update attempts to avoid the extra computation by terminating the function early if an `@` is not detected.
-        * There might be a good reason for intellisense's aggressiveness that I'm unaware of. Remains to be seen if this update breaks the completions for any users.
+  - The completion provider was being executed for any typed character because intellisense is aggressive by default. Although not a big deal, it does mean that unnecessary computations are done for each keystroke. This update attempts to avoid the extra computation by terminating the function early if an `@` is not detected.
+    - There might be a good reason for intellisense's aggressiveness that I'm unaware of. Remains to be seen if this update breaks the completions for any users.
 
 ## [0.3.5] - 2019-03-04
 
@@ -93,8 +97,8 @@
 ## [0.3.2] - 2019-01-11
 
 - Fixes:
-    + When `PandocCiter.ViewType` was set to `"browser"`, the inserted citation would be placed in a selected state. This was a problem because typing any character would erase the inserted citation, e.g. `@insertedKey` would become `@ ` if the space bar is pressed. Updated version should now deselect the citation as soon as it is done inserting it.
-    + The suggestions would pop-up as long as any `@key` exists on the line. This is because the regex searched for the suggestion trigger along the entire line, so any instance of a citation would lead to citation suggested throughout the line. Updated version should now only search for the citation trigger in the most recent word before the cursor instead of the entire line.  
+  - When `PandocCiter.ViewType` was set to `"browser"`, the inserted citation would be placed in a selected state. This was a problem because typing any character would erase the inserted citation, e.g. `@insertedKey` would become `@ ` if the space bar is pressed. Updated version should now deselect the citation as soon as it is done inserting it.
+  - The suggestions would pop-up as long as any `@key` exists on the line. This is because the regex searched for the suggestion trigger along the entire line, so any instance of a citation would lead to citation suggested throughout the line. Updated version should now only search for the citation trigger in the most recent word before the cursor instead of the entire line.
 
 ## [0.3.1] - 2018-11-28
 
@@ -103,13 +107,13 @@
 ## [0.2.0 & 0.3.0] - 2018-11-14
 
 - [0.3.0] Add configuration `PandocCiter.DefaultBib` and `PandocCiter.UseDefaultBib`
-    + `PandocCiter.DefaultBib` should be an absolute path to a bib file. This file will always be loaded in any markdown document without requiring a YAML entry.
+  - `PandocCiter.DefaultBib` should be an absolute path to a bib file. This file will always be loaded in any markdown document without requiring a YAML entry.
 - [0.2.0] Add support for `-@key` syntax
 
 ## [0.1.4] - 2018-11-09
 
 - Bib files will be searched on file save
-    + Previously, the text document had to be closed/re-opened whenever `bibliography: [./path/to/refs]` was updated
+  - Previously, the text document had to be closed/re-opened whenever `bibliography: [./path/to/refs]` was updated
 
 ## [0.1.3 & 0.1.2 & 0.1.1] - 2018-10-11
 
@@ -118,7 +122,7 @@
 ## [0.1.0] - 2018-10-10
 
 - Change `pandoc.citation` scope to `string.other.link.description.markdown.citation`
-    + Citations should now be automatically hi-lighted by most (all?) themes
+  - Citations should now be automatically hi-lighted by most (all?) themes
 - Add support for R-Markdown documents
 
 ## [0.0.9] - 2018-10-05
@@ -141,7 +145,7 @@
 
 - Enable `awaitWriteFinish` on file watcher. This might introduce a short delay before a modified .bib file is parsed, but it prevents .bib files from getting partially parsed when they are still being written to disk.
 - Adapted fix from: https://github.com/James-Yu/LaTeX-Workshop/pull/817
-    + Should improve bib parsing speed
+  - Should improve bib parsing speed
 - Use newer versions of dependencies
 
 ## [0.0.4] - 2018-08-29
@@ -154,10 +158,10 @@
 - Fixed relative path in RootFile being incorrectly resolved relative to the Workplace Directory instead of the RootFile's directory
 - Allow RootFile to either be a relative or absolute path
 
-## [0.0.2] - 2018-08-08 
+## [0.0.2] - 2018-08-08
 
 - Added configuration for ViewType and RootFile
 
-## [0.0.1] - 2018-08-06 
+## [0.0.1] - 2018-08-06
 
 - Initial release
