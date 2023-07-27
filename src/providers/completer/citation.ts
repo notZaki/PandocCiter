@@ -126,9 +126,24 @@ export class Citation {
                     item.fields.author += Object.values(element).join(", ")
                 });
                 item.documentation += `author: ${item.fields.author}\n`
+            } else if (entry.editor) {
+                entry.editor.forEach(element => {
+                    if (item.fields.editor) {
+                        item.fields.editor += " and "
+                    } else {
+                        item.fields.editor = ""
+                    }
+                    item.fields.editor += Object.values(element).join(", ")
+                });
+                item.documentation += `editor: ${item.fields.editor}\n`
             }
             if (entry.issued) {
                 item.documentation += `date: ${Object.values(entry.issued).join()}\n`
+            }
+            if (entry.DOI) {
+                item.documentation += `link: https://doi.org/${entry.DOI}\n`;
+            } else if (entry.URL) {
+                item.documentation += `link: ${entry.URL}\n`;
             }
             fields.forEach(field => {
                 if (entry[field] && !item.fields[field]) {
