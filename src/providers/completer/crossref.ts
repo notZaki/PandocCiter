@@ -114,30 +114,29 @@ export class Crossref {
         };
     }
 
-    private parseLst(ctx: ParseContext): vscode.CompletionItem {
-        let match = this.regexes.lst.exec(ctx.lineMatch.toString());
-        if (!match) return null;
-        let documentation = new vscode.MarkdownString('');
+    private parseLstNormalMatch(
+        ctx: ParseContext,
+        _: RegExpExecArray
+    ): vscode.CompletionItem {
         const doc = ctx.doc.getText();
-        const end = doc.indexOf('```', ctx.lineMatch.index + 1);
+        const end = doc.indexOf("```", ctx.lineMatch.index + 1);
+
         // try to parse language
         const langMatch = /\{.*\.(\w+).*\}/.exec(ctx.lineMatch.toString());
-        const lang = langMatch ? langMatch[1] : '';
+        const lang = langMatch ? langMatch[1] : "";
+
         // try to parse caption
-        const titleMatch = /\{.*caption="(.+)".*\}/.exec(
-            ctx.lineMatch.toString()
-        );
-        const title = titleMatch ? titleMatch[1] : ctx.label;
+        const titleMatch = /\{.*caption="(.+)".*\}/.exec(ctx.lineMatch.toString());
+        let title = titleMatch ? titleMatch[1] : ctx.label;
+        let documentation = new vscode.MarkdownString("");
+
         if (end > 0) {
             documentation = new vscode.MarkdownString(
-                '``` ' +
-                    lang +
-                    ' ' +
-                    doc.substring(
-                        ctx.lineMatch.index + ctx.lineMatch[0].length,
-                        end
-                    ) +
-                    '\n```'
+            "``` " +
+                lang +
+                " " +
+                doc.substring(ctx.lineMatch.index + ctx.lineMatch[0].length, end) +
+                "\n```"
             );
         }
         return {
@@ -146,6 +145,53 @@ export class Crossref {
             detail: title,
             kind: vscode.CompletionItemKind.Reference,
         };
+    }
+
+    private parseLstTableMatch(
+        ctx: ParseContext,
+        match: RegExpExecArray
+    ): vscode.CompletionItem {
+        const doc = ctx.doc.getText();
+        const searchStart = Math.max(ctx.lineMatch.index - foreSearchChars, 0);
+
+        let documentation = new vscode.MarkdownString("");
+        const title = match[1];
+
+        const sig = doc
+            .substring(searchStart, ctx.lineMatch.index)
+            .lastIndexOf("```");
+        if (sig > 0) {
+            const begin = doc.lastIndexOf("\n\n", sig + searchStart);
+            let cursor = begin;
+            // +2 = with header & splitter
+            for (let i = 0; i < tblPrintLines + 2; i++) {
+            const pos = doc.indexOf("\n", cursor + 1);
+            if (pos < 0) break;
+            else cursor = pos;
+            }
+            documentation = new vscode.MarkdownString(
+            doc.substring(begin + 2, cursor)
+            );
+        }
+
+        return {
+            label: `${ctx.type}:${ctx.label}`,
+            documentation: documentation,
+            detail: title,
+            kind: vscode.CompletionItemKind.Reference,
+        };
+    }
+
+    private parseLst(ctx: ParseContext): vscode.CompletionItem {
+        const normalMatch = this.regexes.lst.exec(ctx.lineMatch.toString());
+        if (normalMatch) {
+            return this.parseLstNormalMatch(ctx, normalMatch);
+        }
+        const tableMatch = this.regexes.tbl.exec(ctx.lineMatch.toString());
+        if (tableMatch) {
+            return this.parseLstTableMatch(ctx, tableMatch);
+        }
+        return null;
     }
 
     private parseEq(ctx: ParseContext): vscode.CompletionItem {
