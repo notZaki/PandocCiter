@@ -1,132 +1,131 @@
 {
-    "name": "pandocciter",
-    "displayName": "Pandoc Citer",
-    "description": "Autocomplete bibtex citations for markdown/pandoc",
-    "version": "0.10.3",
-    "publisher": "notZaki",
-    "license": "MIT",
-    "engines": {
-        "vscode": "^1.78.1"
-    },
-    "icon": "icon.png",
-    "homepage": "https://github.com/notZaki/PandocCiter",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/notZaki/PandocCiter"
-    },
-    "bugs": {
-        "url": "https://github.com/notZaki/PandocCiter/issues"
-    },
-    "categories": [
-        "Other"
-    ],
-    "activationEvents": [
-        "onLanguage:markdown",
-        "onLanguage:rmd",
-        "onLanguage:pweave_md",
-        "onLanguage:quarto"
-    ],
-    "main": "./out/extension",
-    "contributes": {
-        "grammars": [
-            {
-                "injectTo": [
-                    "text.html.markdown",
-                    "text.html.markdown.redcarpet",
-                    "source.pweave.md"
-                ],
-                "scopeName": "pandoc-citation",
-                "path": "./syntaxes/citations.json"
-            }
+  "name": "pandocciter",
+  "displayName": "Pandoc Citer",
+  "description": "Autocomplete bibtex citations for markdown/pandoc",
+  "version": "0.10.3",
+  "publisher": "notZaki",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.78.1"
+  },
+  "icon": "icon.png",
+  "homepage": "https://github.com/notZaki/PandocCiter",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/notZaki/PandocCiter"
+  },
+  "bugs": {
+    "url": "https://github.com/notZaki/PandocCiter/issues"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onLanguage:markdown",
+    "onLanguage:rmd",
+    "onLanguage:pweave_md",
+    "onLanguage:quarto"
+  ],
+  "main": "./out/extension",
+  "contributes": {
+    "grammars": [
+      {
+        "injectTo": [
+          "text.html.markdown",
+          "text.html.markdown.redcarpet",
+          "source.pweave.md"
         ],
-        "configuration": {
-            "title": "PandocCiter",
-            "properties": {
-                "PandocCiter.ViewType": {
-                    "type": "string",
-                    "enum": [
-                        "inline",
-                        "browser"
-                    ],
-                    "default": "inline",
-                    "description": "How citation completions are shown"
-                },
-                "PandocCiter.RootFile": {
-                    "type": "string",
-                    "default": "",
-                    "scope": "resource",
-                    "description": "Main document containing YAML for bibliography"
-                },
-                "PandocCiter.ShowLog": {
-                    "type": "boolean",
-                    "default": false,
-                    "description": "Should log be shown in Output panel"
-                },
-                "PandocCiter.DefaultBib": {
-                    "type": "string",
-                    "default": "",
-                    "scope": "resource",
-                    "description": "Path to default bib file"
-                },
-                "PandocCiter.DefaultBibs": {
-                    "type": "array",
-                    "default": [],
-                    "scope": "resource",
-                    "description": "Path to default bib files"
-                },
-                "PandocCiter.UseDefaultBib": {
-                    "type": "boolean",
-                    "default": true,
-                    "scope": "resource",
-                    "description": "Whether to use the Default Bib"
-                },
-                "PandocCiter.ForgetUnusedBib": {
-                    "type": "boolean",
-                    "default": true,
-                    "description": "Whether to forget bib file when changing documents"
-                },
-                "PandocCiter.CitationFormat": {
-                    "type": "array",
-                    "default": [
-                        "author",
-                        "title",
-                        "journal",
-                        "container-title",
-                        "publisher",
-                        "booktitle",
-                        "year"
-                    ],
-                    "description": "List of fields displayed in preview"
-                },
-                "PandocCiter.CrossRefMode": {
-                    "type": "string",
-                    "default": "full",
-                    "description": "The features of CrossRef functionalities to enable",
-                    "enum": [
-                        "full",
-                        "minimal",
-                        "none"
-                    ]
-                }
-            }
+        "scopeName": "pandoc-citation",
+        "path": "./syntaxes/citations.json"
+      }
+    ],
+    "configuration": {
+      "title": "PandocCiter",
+      "properties": {
+        "PandocCiter.ViewType": {
+          "type": "string",
+          "enum": [
+            "inline",
+            "browser"
+          ],
+          "default": "inline",
+          "description": "How citation completions are shown"
+        },
+        "PandocCiter.RootFile": {
+          "type": "string",
+          "default": "",
+          "scope": "resource",
+          "description": "Main document containing YAML for bibliography"
+        },
+        "PandocCiter.ShowLog": {
+          "type": "boolean",
+          "default": false,
+          "description": "Should log be shown in Output panel"
+        },
+        "PandocCiter.DefaultBib": {
+          "type": "string",
+          "default": "",
+          "scope": "resource",
+          "description": "Path to default bib file"
+        },
+        "PandocCiter.DefaultBibs": {
+          "type": "array",
+          "default": [],
+          "scope": "resource",
+          "description": "Path to default bib files"
+        },
+        "PandocCiter.UseDefaultBib": {
+          "type": "boolean",
+          "default": true,
+          "scope": "resource",
+          "description": "Whether to use the Default Bib"
+        },
+        "PandocCiter.ForgetUnusedBib": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether to forget bib file when changing documents"
+        },
+        "PandocCiter.CitationFormat": {
+          "type": "array",
+          "default": [
+            "author",
+            "title",
+            "journal",
+            "container-title",
+            "publisher",
+            "booktitle",
+            "year"
+          ],
+          "description": "List of fields displayed in preview"
+        },
+        "PandocCiter.CrossRefMode": {
+          "type": "string",
+          "default": "full",
+          "description": "The features of CrossRef functionalities to enable",
+          "enum": [
+            "full",
+            "minimal",
+            "none"
+          ]
         }
-    },
-    "scripts": {
-        "vscode:prepublish": "npm run compile",
-        "compile": "tsc -p ./",
-        "watch": "tsc -watch -p ./",
-        "test": "npm run compile && node ./node_modules/vscode/bin/test"
-    },
-    "dependencies": {
-        "chokidar": "^3.5.3",
-        "latex-utensils": "^6.1.0",
-        "js-yaml": "^4"
-
-    },
-    "devDependencies": {
-        "@types/node": "^20.2.5",
-        "eslint": "^8.42.0",
-        "typescript": "^5.1.3",
-        "@types/vscode": "^1.78.1"
+      }
     }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "test": "npm run compile && node ./node_modules/vscode/bin/test"
+  },
+  "dependencies": {
+    "chokidar": "^3.5.3",
+    "latex-utensils": "^6.1.0",
+    "js-yaml": "^4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.2.5",
+    "eslint": "^8.42.0",
+    "typescript": "^5.1.3",
+    "@types/vscode": "^1.78.1"
+  }
 }

@@ -1,31 +1,31 @@
 {
-    "injectionSelector": ["L:text.html.markdown", "L:source.pweave.md"],
-    "patterns": [
-        {
-            "include": "#pandoc-citationA"
-        },
-        {
-            "include": "#pandoc-citationB"
-        }
-    ],
-    "repository": {
-        "pandoc-citationA":{
-            "match": "(?<=^|\\s|\\[)(-?@(.*?))(?=$|[\\s\\r\\n\\]{},~#%\\\\'\"=\\(\\)])",
-            "name": "string.other.link.description.markdown.citation"
-        },
-        "pandoc-citationB":{
-            "captures": {
-                "2": {
-                    "name": "string.other.link.description.markdown.citation"
-                }
-            },
-            "match": "(\\[)(-?@(.*?))(?=$|[\\s\\r\\n\\]{},~#%\\\\'\"=\\(\\)])",
-            "name": "meta.paragraph.markdown"
-        },
-        "pandoc-crossref":{
-            "match": "\\@(fig|tbl|sec|eq|lst):\\w+",
-            "name": "string.other.link.description.markdown.citation"
-        }
+  "injectionSelector": ["L:text.html.markdown", "L:source.pweave.md"],
+  "patterns": [
+    {
+      "include": "#pandoc-citationA"
     },
-    "scopeName": "pandoc-citation"
+    {
+      "include": "#pandoc-citationB"
+    }
+  ],
+  "repository": {
+    "pandoc-citationA": {
+      "match": "(?<=^|\\s|\\[)(-?@(.*?))(?=$|[\\s\\r\\n\\]{},~#%\\\\'\"=\\(\\)])",
+      "name": "string.other.link.description.markdown.citation"
+    },
+    "pandoc-citationB": {
+      "captures": {
+        "2": {
+          "name": "string.other.link.description.markdown.citation"
+        }
+      },
+      "match": "(\\[)(-?@(.*?))(?=$|[\\s\\r\\n\\]{},~#%\\\\'\"=\\(\\)])",
+      "name": "meta.paragraph.markdown"
+    },
+    "pandoc-crossref": {
+      "match": "\\@(fig|tbl|sec|eq|lst):\\w+",
+      "name": "string.other.link.description.markdown.citation"
+    }
+  },
+  "scopeName": "pandoc-citation"
 }

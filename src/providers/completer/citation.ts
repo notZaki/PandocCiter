@@ -23,213 +23,279 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import * as vscode from 'vscode';
-import * as path from 'path';
-import * as fs from 'fs';
+import * as vscode from "vscode";
+import * as path from "path";
+import * as fs from "fs";
 
-import {Extension} from '../../extension';
-import {bibtexParser} from 'latex-utensils';
-
+import { Extension } from "../../extension";
+import { bibtexParser } from "latex-utensils";
 
 export interface Suggestion extends vscode.CompletionItem {
-    key: string;
-    documentation: string;
-    fields: {[key: string]: string};
-    file: string;
-    position: vscode.Position; // Unnecessary?
+  key: string;
+  documentation: string;
+  fields: { [key: string]: string };
+  file: string;
+  position: vscode.Position; // Unnecessary?
 }
 
 export class Citation {
-    extension: Extension;
-    private bibEntries: {[file: string]: Suggestion[]} = {};
+  extension: Extension;
+  private bibEntries: { [file: string]: Suggestion[] } = {};
 
-    constructor(extension: Extension) {
-        this.extension = extension;
-    }
-    
-    provide(args?: {document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext}): vscode.CompletionItem[] {
-        // Compile the suggestion array to vscode completion array
-        return this.updateAll().map(item => {
-            item.filterText = Object.values(item.fields).join(" ")
-            item.insertText = item.key;
-            if (args) {
-                item.range = args.document.getWordRangeAtPosition(args.position, /[-a-zA-Z0-9_:.]+/);
-            }
-            return item;
-        });
-    }
+  constructor(extension: Extension) {
+    this.extension = extension;
+  }
 
-    browser(_args?: {document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext}) {
-        vscode.window.showQuickPick(this.updateAll().map(item => {
-            return {
-                label: item.fields.title ? item.fields.title : '',
-                description: `${item.key}`,
-                detail: `Authors: ${item.fields.author ? item.fields.author : 'Unknown'}, publication: ${item.fields.journal ? item.fields.journal : (item.fields.journaltitle ? item.fields.journaltitle : (item.fields.publisher ? item.fields.publisher : 'Unknown'))}`
-            };
-        }), {
-            placeHolder: 'Press ENTER to insert citation key at cursor',
-            matchOnDetail: true,
-            matchOnDescription: true,
-            ignoreFocusOut: true
-        }).then(selected => {
-            if (!selected) {
-                return;
-            }
-            if (vscode.window.activeTextEditor) {
-                const editor = vscode.window.activeTextEditor;
-                const content = editor.document.getText(new vscode.Range(new vscode.Position(0, 0), editor.selection.start));
-                let start = editor.selection.start;
-                if (content.lastIndexOf('\\cite') > content.lastIndexOf('}')) {
-                    const curlyStart = content.lastIndexOf('{') + 1;
-                    const commaStart = content.lastIndexOf(',') + 1;
-                    start = editor.document.positionAt(curlyStart > commaStart ? curlyStart : commaStart);
-                }
-                editor.edit(edit => edit.replace(new vscode.Range(start, editor.selection.start), selected.description || ''))
-                    .then(() => editor.selection = new vscode.Selection(editor.selection.end, editor.selection.end));
-            }
-        });
-    }
+  provide(args?: {
+    document: vscode.TextDocument;
+    position: vscode.Position;
+    token: vscode.CancellationToken;
+    context: vscode.CompletionContext;
+  }): vscode.CompletionItem[] {
+    // Compile the suggestion array to vscode completion array
+    return this.updateAll().map((item) => {
+      item.filterText = Object.values(item.fields).join(" ");
+      item.insertText = item.key;
+      if (args) {
+        item.range = args.document.getWordRangeAtPosition(
+          args.position,
+          /[-a-zA-Z0-9_:.]+/
+        );
+      }
+      return item;
+    });
+  }
 
-    parseBibFile(file:string) {
-        const ext = path.extname(file)
-        if (ext == ".bib") {
-            this.parseBibtexFile(file)
-        } else if (ext == ".json") {
-            this.parseBibjsonFile(file)
-        } else {
-            this.extension.log(`Unknown file extension force: ${file}`);
+  browser(_args?: {
+    document: vscode.TextDocument;
+    position: vscode.Position;
+    token: vscode.CancellationToken;
+    context: vscode.CompletionContext;
+  }) {
+    vscode.window
+      .showQuickPick(
+        this.updateAll().map((item) => {
+          return {
+            label: item.fields.title ? item.fields.title : "",
+            description: `${item.key}`,
+            detail: `Authors: ${
+              item.fields.author ? item.fields.author : "Unknown"
+            }, publication: ${
+              item.fields.journal
+                ? item.fields.journal
+                : item.fields.journaltitle
+                ? item.fields.journaltitle
+                : item.fields.publisher
+                ? item.fields.publisher
+                : "Unknown"
+            }`,
+          };
+        }),
+        {
+          placeHolder: "Press ENTER to insert citation key at cursor",
+          matchOnDetail: true,
+          matchOnDescription: true,
+          ignoreFocusOut: true,
         }
-    }
-
-    parseBibjsonFile(file: string) {
-        const fields: string[] = (vscode.workspace.getConfiguration('PandocCiter').get('CitationFormat') as string[]).map(f => { return f.toLowerCase(); });
-        this.extension.log(`Parsing .bib entries from ${file}`);
-        this.bibEntries[file] = [];
-        let json = JSON.parse(fs.readFileSync(file, "utf-8"));
-        json.forEach((entry) => {
-            const item: Suggestion = {
-                key: entry.id,
-                label: entry.id,
-                file,
-                position: new vscode.Position(0, 0),
-                kind: vscode.CompletionItemKind.Reference,
-                documentation: '',
-                fields: {}
-            }
-            if (entry.author) {
-                entry.author.forEach(element => {
-                    if (item.fields.author) {
-                        item.fields.author += " and "
-                    } else {
-                        item.fields.author = ""
-                    }
-                    item.fields.author += Object.values(element).join(", ")
-                });
-                item.documentation += `author: ${item.fields.author}\n`
-            } else if (entry.editor) {
-                entry.editor.forEach(element => {
-                    if (item.fields.editor) {
-                        item.fields.editor += " and "
-                    } else {
-                        item.fields.editor = ""
-                    }
-                    item.fields.editor += Object.values(element).join(", ")
-                });
-                item.documentation += `editor: ${item.fields.editor}\n`
-            }
-            if (entry.issued) {
-                item.documentation += `date: ${Object.values(entry.issued).join()}\n`
-            }
-            if (entry.DOI) {
-                item.documentation += `link: https://doi.org/${entry.DOI}\n`;
-            } else if (entry.URL) {
-                item.documentation += `link: ${entry.URL}\n`;
-            }
-            fields.forEach(field => {
-                if (entry[field] && !item.fields[field]) {
-                    item.fields[field] = entry[field]
-                    item.documentation += `${field}: ${item.fields[field]}\n`
-                }
-            })
-            this.bibEntries[file].push(item);
-        })
-        this.extension.log(`Parsed ${this.bibEntries[file].length} bib entries from ${file}.`);
-    }
-    
-    parseBibtexFile(file: string) {
-        const fields: string[] = (vscode.workspace.getConfiguration('PandocCiter').get('CitationFormat') as string[]).map(f => { return f.toLowerCase(); });
-        this.extension.log(`Parsing .bib entries from ${file}`);
-        this.bibEntries[file] = [];
-        const bibtex = fs.readFileSync(file).toString();
-        const ast = bibtexParser.parse(bibtex);
-        ast.content
-            .filter(bibtexParser.isEntry)
-            .forEach((entry: bibtexParser.Entry) => {
-                if (entry.internalKey === undefined) {
-                    return;
-                }
-                const item: Suggestion = {
-                    key: entry.internalKey,
-                    label: entry.internalKey,
-                    file,
-                    position: new vscode.Position(entry.location.start.line - 1, entry.location.start.column - 1),
-                    kind: vscode.CompletionItemKind.Reference,
-                    documentation: '',
-                    fields: {}
-                };
-                fields.forEach(field => {
-                    const fieldcontents = entry.content.filter(e => e.name === field)
-                    if (fieldcontents.length > 0) {
-                        const fieldcontent = fieldcontents[0]
-                        const value = Array.isArray(fieldcontent.value.content) ?
-                        fieldcontent.value.content.join(' ') : this.deParenthesis(fieldcontent.value.content);
-                        item.fields[fieldcontent.name] = value;
-                        item.documentation += `${fieldcontent.name.charAt(0).toUpperCase() + fieldcontent.name.slice(1)}: ${value}\n`;
-                    }
-                })
-                this.bibEntries[file].push(item);
-            });
-        this.extension.log(`Parsed ${this.bibEntries[file].length} bib entries from ${file}.`);
-    }
-
-    getEntry(key: string): Suggestion | undefined {
-        const suggestions = this.updateAll()
-        const entry = suggestions.find((elm) => elm.key === key)
-        return entry
-    }
-
-    private deParenthesis(str: string) {
-        return str.replace(/{+([^\\{}]+)}+/g, '$1');
-    }
-
-    private updateAll(bibFiles?: string[]): Suggestion[] {
-        let suggestions: Suggestion[] = [];
-        // From bib files
-        if (bibFiles === undefined) {
-            bibFiles = Object.keys(this.bibEntries);
+      )
+      .then((selected) => {
+        if (!selected) {
+          return;
         }
-        bibFiles.forEach(file => {
-            suggestions = suggestions.concat(this.bibEntries[file]);
+        if (vscode.window.activeTextEditor) {
+          const editor = vscode.window.activeTextEditor;
+          const content = editor.document.getText(
+            new vscode.Range(new vscode.Position(0, 0), editor.selection.start)
+          );
+          let start = editor.selection.start;
+          if (content.lastIndexOf("\\cite") > content.lastIndexOf("}")) {
+            const curlyStart = content.lastIndexOf("{") + 1;
+            const commaStart = content.lastIndexOf(",") + 1;
+            start = editor.document.positionAt(
+              curlyStart > commaStart ? curlyStart : commaStart
+            );
+          }
+          editor
+            .edit((edit) =>
+              edit.replace(
+                new vscode.Range(start, editor.selection.start),
+                selected.description || ""
+              )
+            )
+            .then(
+              () =>
+                (editor.selection = new vscode.Selection(
+                  editor.selection.end,
+                  editor.selection.end
+                ))
+            );
+        }
+      });
+  }
+
+  parseBibFile(file: string) {
+    const ext = path.extname(file);
+    if (ext == ".bib") {
+      this.parseBibtexFile(file);
+    } else if (ext == ".json") {
+      this.parseBibjsonFile(file);
+    } else {
+      this.extension.log(`Unknown file extension force: ${file}`);
+    }
+  }
+
+  parseBibjsonFile(file: string) {
+    const fields: string[] = (
+      vscode.workspace
+        .getConfiguration("PandocCiter")
+        .get("CitationFormat") as string[]
+    ).map((f) => {
+      return f.toLowerCase();
+    });
+    this.extension.log(`Parsing .bib entries from ${file}`);
+    this.bibEntries[file] = [];
+    let json = JSON.parse(fs.readFileSync(file, "utf-8"));
+    json.forEach((entry) => {
+      const item: Suggestion = {
+        key: entry.id,
+        label: entry.id,
+        file,
+        position: new vscode.Position(0, 0),
+        kind: vscode.CompletionItemKind.Reference,
+        documentation: "",
+        fields: {},
+      };
+      if (entry.author) {
+        entry.author.forEach((element) => {
+          if (item.fields.author) {
+            item.fields.author += " and ";
+          } else {
+            item.fields.author = "";
+          }
+          item.fields.author += Object.values(element).join(", ");
         });
-        this.checkForDuplicates(suggestions);
-        return suggestions;
-    }
-
-    checkForDuplicates(items: Suggestion[]) {
-        const allKeys = (items.map(items => items.key));
-        if ((new Set(allKeys)).size !== allKeys.length) {
-            // Code from: https://stackoverflow.com/questions/840781/get-all-non-unique-values-i-e-duplicate-more-than-one-occurrence-in-an-array
-            const count = keys => 
-                keys.reduce((a, b) => 
-                    Object.assign(a, {[b]: (a[b] || 0) + 1}), {});
-            const duplicates = dict => 
-                Object.keys(dict).filter((a) => dict[a] > 1);
-            vscode.window.showInformationMessage(`Duplicate key(s): ${duplicates(count(allKeys))}`);
+        item.documentation += `author: ${item.fields.author}\n`;
+      } else if (entry.editor) {
+        entry.editor.forEach((element) => {
+          if (item.fields.editor) {
+            item.fields.editor += " and ";
+          } else {
+            item.fields.editor = "";
+          }
+          item.fields.editor += Object.values(element).join(", ");
+        });
+        item.documentation += `editor: ${item.fields.editor}\n`;
+      }
+      if (entry.issued) {
+        item.documentation += `date: ${Object.values(entry.issued).join()}\n`;
+      }
+      if (entry.DOI) {
+        item.documentation += `link: https://doi.org/${entry.DOI}\n`;
+      } else if (entry.URL) {
+        item.documentation += `link: ${entry.URL}\n`;
+      }
+      fields.forEach((field) => {
+        if (entry[field] && !item.fields[field]) {
+          item.fields[field] = entry[field];
+          item.documentation += `${field}: ${item.fields[field]}\n`;
         }
-    }
+      });
+      this.bibEntries[file].push(item);
+    });
+    this.extension.log(
+      `Parsed ${this.bibEntries[file].length} bib entries from ${file}.`
+    );
+  }
 
-    forgetParsedBibItems(bibPath: string) {
-        this.extension.log(`Forgetting parsed bib entries for ${bibPath}`);
-        delete this.bibEntries[bibPath];
+  parseBibtexFile(file: string) {
+    const fields: string[] = (
+      vscode.workspace
+        .getConfiguration("PandocCiter")
+        .get("CitationFormat") as string[]
+    ).map((f) => {
+      return f.toLowerCase();
+    });
+    this.extension.log(`Parsing .bib entries from ${file}`);
+    this.bibEntries[file] = [];
+    const bibtex = fs.readFileSync(file).toString();
+    const ast = bibtexParser.parse(bibtex);
+    ast.content
+      .filter(bibtexParser.isEntry)
+      .forEach((entry: bibtexParser.Entry) => {
+        if (entry.internalKey === undefined) {
+          return;
+        }
+        const item: Suggestion = {
+          key: entry.internalKey,
+          label: entry.internalKey,
+          file,
+          position: new vscode.Position(
+            entry.location.start.line - 1,
+            entry.location.start.column - 1
+          ),
+          kind: vscode.CompletionItemKind.Reference,
+          documentation: "",
+          fields: {},
+        };
+        fields.forEach((field) => {
+          const fieldcontents = entry.content.filter((e) => e.name === field);
+          if (fieldcontents.length > 0) {
+            const fieldcontent = fieldcontents[0];
+            const value = Array.isArray(fieldcontent.value.content)
+              ? fieldcontent.value.content.join(" ")
+              : this.deParenthesis(fieldcontent.value.content);
+            item.fields[fieldcontent.name] = value;
+            item.documentation += `${
+              fieldcontent.name.charAt(0).toUpperCase() +
+              fieldcontent.name.slice(1)
+            }: ${value}\n`;
+          }
+        });
+        this.bibEntries[file].push(item);
+      });
+    this.extension.log(
+      `Parsed ${this.bibEntries[file].length} bib entries from ${file}.`
+    );
+  }
+
+  getEntry(key: string): Suggestion | undefined {
+    const suggestions = this.updateAll();
+    const entry = suggestions.find((elm) => elm.key === key);
+    return entry;
+  }
+
+  private deParenthesis(str: string) {
+    return str.replace(/{+([^\\{}]+)}+/g, "$1");
+  }
+
+  private updateAll(bibFiles?: string[]): Suggestion[] {
+    let suggestions: Suggestion[] = [];
+    // From bib files
+    if (bibFiles === undefined) {
+      bibFiles = Object.keys(this.bibEntries);
     }
+    bibFiles.forEach((file) => {
+      suggestions = suggestions.concat(this.bibEntries[file]);
+    });
+    this.checkForDuplicates(suggestions);
+    return suggestions;
+  }
+
+  checkForDuplicates(items: Suggestion[]) {
+    const allKeys = items.map((items) => items.key);
+    if (new Set(allKeys).size !== allKeys.length) {
+      // Code from: https://stackoverflow.com/questions/840781/get-all-non-unique-values-i-e-duplicate-more-than-one-occurrence-in-an-array
+      const count = (keys) =>
+        keys.reduce((a, b) => Object.assign(a, { [b]: (a[b] || 0) + 1 }), {});
+      const duplicates = (dict) => Object.keys(dict).filter((a) => dict[a] > 1);
+      vscode.window.showInformationMessage(
+        `Duplicate key(s): ${duplicates(count(allKeys))}`
+      );
+    }
+  }
+
+  forgetParsedBibItems(bibPath: string) {
+    this.extension.log(`Forgetting parsed bib entries for ${bibPath}`);
+    delete this.bibEntries[bibPath];
+  }
 }

@@ -24,162 +24,177 @@
 // SOFTWARE.
 //////////////////////////////////////////////////////////////////////////////////////////
 
-import * as vscode from 'vscode';
-import * as path from 'path';
-import * as fs from 'fs';
-import * as chokidar from 'chokidar';
-import yaml = require('js-yaml');
+import * as vscode from "vscode";
+import * as path from "path";
+import * as fs from "fs";
+import * as chokidar from "chokidar";
+import yaml = require("js-yaml");
 
-import {Extension} from '../extension';
+import { Extension } from "../extension";
 
 export class Manager {
-    extension: Extension;
-    bibWatcher: chokidar.FSWatcher;
-    watched: string[];
+  extension: Extension;
+  bibWatcher: chokidar.FSWatcher;
+  watched: string[];
 
-    constructor(extension: Extension) {
-        this.extension = extension;
-        this.watched   = [];
+  constructor(extension: Extension) {
+    this.extension = extension;
+    this.watched = [];
+  }
+
+  findBib(): void {
+    let foundFiles: string[] = [];
+    const activeText = vscode.window.activeTextEditor!.document.getText();
+
+    // Re-use the old reg-ex approach in case the yaml parser fails
+    const bibRegex = /^bibliography:\s* \[(.*)\]/m;
+    let bibresult = activeText.match(bibRegex);
+    if (bibresult) {
+      const bibFiles = bibresult[1].split(",").map((item) => item.trim());
+      for (let i in bibFiles) {
+        let bibFile = this.stripQuotes(bibFiles[i]);
+        bibFile = this.resolveBibFile(bibFile, undefined);
+        this.extension.log(`Looking for .bib file: ${bibFile}`);
+        this.addBibToWatcher(bibFile);
+        foundFiles.push(bibFile);
+      }
     }
 
-    findBib() : void {
-        let foundFiles: string[] = [];
-        const activeText = vscode.window.activeTextEditor!.document.getText();
-        
-        // Re-use the old reg-ex approach in case the yaml parser fails
-        const bibRegex = /^bibliography:\s* \[(.*)\]/m;
-        let bibresult = activeText.match(bibRegex);
-        if (bibresult) {
-            const bibFiles = bibresult[1].split(',').map(item => item.trim());
-            for (let i in bibFiles) {
-                let bibFile = this.stripQuotes(bibFiles[i]);
-                bibFile = this.resolveBibFile(bibFile, undefined);
-                this.extension.log(`Looking for .bib file: ${bibFile}`);
-                this.addBibToWatcher(bibFile);
-                foundFiles.push(bibFile);
-            }
-        }
-
-        // This is the newer approach using yaml-js
-        const docURI = vscode.window.activeTextEditor!.document.uri;
-        const configuration = vscode.workspace.getConfiguration('PandocCiter', docURI);
-        const rootFolder = vscode.workspace.getWorkspaceFolder(docURI)?.uri.fsPath;
-        const yamltext = activeText.match(/---\r?\n((.+\r?\n)+)---/gm)
-        const parsedyaml = yaml.loadAll(yamltext)[0]
-        if (parsedyaml && parsedyaml.bibliography) {
-            const bibInYaml = yaml.loadAll(yamltext)[0].bibliography
-            const bibFiles = (bibInYaml instanceof Array ? bibInYaml : [bibInYaml]);
-            for (let i in bibFiles) {
-                let bibFile = this.stripQuotes(bibFiles[i]);
-                bibFile = this.resolveBibFile(bibFile, undefined);
-                this.extension.log(`Looking for file: ${bibFile}`);
-                this.addBibToWatcher(bibFile);
-                foundFiles.push(bibFile);
-            }
-        }
-        const rootfile: string = configuration.get('RootFile')
-        if (rootfile !== "") {
-            let curInput = path.join(rootfile);
-            if (!path.isAbsolute(curInput) && rootFolder) { 
-                curInput = path.join(rootFolder, rootfile);
-            }
-            const rootText = fs.readFileSync(curInput,'utf8');
-            const bibInYaml = yaml.loadAll(rootText)[0].bibliography
-            const bibFiles = (bibInYaml instanceof Array ? bibInYaml : [bibInYaml]);
-            for (let i in bibFiles) {
-                let bibFile = path.join(path.dirname(curInput), bibFiles[i]);
-                bibFile = this.resolveBibFile(bibFile, rootFolder);
-                this.extension.log(`Looking for file: ${bibFile}`);
-                this.addBibToWatcher(bibFile);
-                foundFiles.push(bibFile);
-            }
-        }
-        if (configuration.get('UseDefaultBib') && (configuration.get('DefaultBib'))) {
-            let bibFile = path.join(configuration.get('DefaultBib'));
-            bibFile = this.resolveBibFile(bibFile, rootFolder);
-            this.extension.log(`Looking for file: ${bibFile}`);
-            this.addBibToWatcher(bibFile);
-            foundFiles.push(bibFile);
-        }
-        if (configuration.get('UseDefaultBib') && (configuration.get('DefaultBibs'))) {
-            let bibFiles: string[] = configuration.get('DefaultBibs');
-            bibFiles.forEach(element => {
-                let bibFile = this.resolveBibFile(path.join(element), rootFolder);
-                this.extension.log(`Looking for file: ${bibFile}`);
-                this.addBibToWatcher(bibFile);
-                foundFiles.push(bibFile); 
-            });
-        }
-        let watched_but_not_found = this.watched.filter(e => !foundFiles.includes(e));
-        if (configuration.get('ForgetUnusedBib')) {
-            if (watched_but_not_found.length > 0) {
-                this.forgetUnusedFiles(watched_but_not_found);
-            }
-        }
-        return;
+    // This is the newer approach using yaml-js
+    const docURI = vscode.window.activeTextEditor!.document.uri;
+    const configuration = vscode.workspace.getConfiguration(
+      "PandocCiter",
+      docURI
+    );
+    const rootFolder = vscode.workspace.getWorkspaceFolder(docURI)?.uri.fsPath;
+    const yamltext = activeText.match(/---\r?\n((.+\r?\n)+)---/gm);
+    const parsedyaml = yaml.loadAll(yamltext)[0];
+    if (parsedyaml && parsedyaml.bibliography) {
+      const bibInYaml = yaml.loadAll(yamltext)[0].bibliography;
+      const bibFiles = bibInYaml instanceof Array ? bibInYaml : [bibInYaml];
+      for (let i in bibFiles) {
+        let bibFile = this.stripQuotes(bibFiles[i]);
+        bibFile = this.resolveBibFile(bibFile, undefined);
+        this.extension.log(`Looking for file: ${bibFile}`);
+        this.addBibToWatcher(bibFile);
+        foundFiles.push(bibFile);
+      }
     }
-
-    stripQuotes(inputString: string) {
-        if (inputString[0] === inputString[inputString.length-1] && "\"'".includes(inputString[0])) {
-            return inputString.slice(1, -1);
-        } else {
-            return inputString;
-        }
+    const rootfile: string = configuration.get("RootFile");
+    if (rootfile !== "") {
+      let curInput = path.join(rootfile);
+      if (!path.isAbsolute(curInput) && rootFolder) {
+        curInput = path.join(rootFolder, rootfile);
+      }
+      const rootText = fs.readFileSync(curInput, "utf8");
+      const bibInYaml = yaml.loadAll(rootText)[0].bibliography;
+      const bibFiles = bibInYaml instanceof Array ? bibInYaml : [bibInYaml];
+      for (let i in bibFiles) {
+        let bibFile = path.join(path.dirname(curInput), bibFiles[i]);
+        bibFile = this.resolveBibFile(bibFile, rootFolder);
+        this.extension.log(`Looking for file: ${bibFile}`);
+        this.addBibToWatcher(bibFile);
+        foundFiles.push(bibFile);
+      }
     }
-
-    resolveBibFile(bibFile: string, rootFolder: string) {
-        if (path.isAbsolute(bibFile)) {
-            return bibFile;
-        } else if (rootFolder) { 
-            return path.resolve(path.join(rootFolder, bibFile));
-        } else {
-            return path.resolve(path.dirname(vscode.window.activeTextEditor!.document.fileName), bibFile)
-        }
+    if (configuration.get("UseDefaultBib") && configuration.get("DefaultBib")) {
+      let bibFile = path.join(configuration.get("DefaultBib"));
+      bibFile = this.resolveBibFile(bibFile, rootFolder);
+      this.extension.log(`Looking for file: ${bibFile}`);
+      this.addBibToWatcher(bibFile);
+      foundFiles.push(bibFile);
     }
-
-    addBibToWatcher(bibPath: string) {
-        if (!fs.existsSync(bibPath) && fs.existsSync(bibPath + '.json')) {
-            bibPath += '.json';
-        }
-        if (!fs.existsSync(bibPath) && fs.existsSync(bibPath + '.bib')) {
-            bibPath += '.bib';
-        }
-        if (fs.existsSync(bibPath)) {
-            this.extension.log(`Found file ${bibPath}`);
-            if (this.bibWatcher === undefined) {
-                this.extension.log(`Creating file watcher for files.`);
-                this.bibWatcher = chokidar.watch(bibPath, {awaitWriteFinish: true});
-                this.bibWatcher.on('change', (filePath: string) => {
-                    this.extension.log(`Bib file watcher - responding to change in ${filePath}`);
-                    this.extension.completer.citation.parseBibFile(filePath);
-                });
-                this.bibWatcher.on('unlink', (filePath: string) => {
-                    this.extension.log(`Bib file watcher: ${filePath} deleted.`);
-                    this.extension.completer.citation.forgetParsedBibItems(filePath);
-                    this.bibWatcher.unwatch(filePath);
-                    this.watched.splice(this.watched.indexOf(filePath), 1);
-                });
-                this.extension.completer.citation.parseBibFile(bibPath);
-            } else if (this.watched.indexOf(bibPath) < 0) {
-                this.extension.log(`Adding file ${bibPath} to bib file watcher.`);
-                this.bibWatcher.add(bibPath);
-                this.watched.push(bibPath);
-                this.extension.completer.citation.parseBibFile(bibPath);
-            } else {
-                this.extension.log(`bib file ${bibPath} is already being watched.`);
-            }
-        }
+    if (
+      configuration.get("UseDefaultBib") &&
+      configuration.get("DefaultBibs")
+    ) {
+      let bibFiles: string[] = configuration.get("DefaultBibs");
+      bibFiles.forEach((element) => {
+        let bibFile = this.resolveBibFile(path.join(element), rootFolder);
+        this.extension.log(`Looking for file: ${bibFile}`);
+        this.addBibToWatcher(bibFile);
+        foundFiles.push(bibFile);
+      });
     }
-
-    forgetUnusedFiles(filesToForget: string[]) {
-        for (let i in filesToForget) {
-            let filePath = filesToForget[i];
-            this.extension.log(`Forget unused bib file: ${filePath}`);
-            this.extension.completer.citation.forgetParsedBibItems(filePath);
-            this.bibWatcher.unwatch(filePath);
-            this.watched.splice(this.watched.indexOf(filePath), 1);
-        }
-        return;
+    let watched_but_not_found = this.watched.filter(
+      (e) => !foundFiles.includes(e)
+    );
+    if (configuration.get("ForgetUnusedBib")) {
+      if (watched_but_not_found.length > 0) {
+        this.forgetUnusedFiles(watched_but_not_found);
+      }
     }
+    return;
+  }
 
+  stripQuotes(inputString: string) {
+    if (
+      inputString[0] === inputString[inputString.length - 1] &&
+      "\"'".includes(inputString[0])
+    ) {
+      return inputString.slice(1, -1);
+    } else {
+      return inputString;
+    }
+  }
+
+  resolveBibFile(bibFile: string, rootFolder: string) {
+    if (path.isAbsolute(bibFile)) {
+      return bibFile;
+    } else if (rootFolder) {
+      return path.resolve(path.join(rootFolder, bibFile));
+    } else {
+      return path.resolve(
+        path.dirname(vscode.window.activeTextEditor!.document.fileName),
+        bibFile
+      );
+    }
+  }
+
+  addBibToWatcher(bibPath: string) {
+    if (!fs.existsSync(bibPath) && fs.existsSync(bibPath + ".json")) {
+      bibPath += ".json";
+    }
+    if (!fs.existsSync(bibPath) && fs.existsSync(bibPath + ".bib")) {
+      bibPath += ".bib";
+    }
+    if (fs.existsSync(bibPath)) {
+      this.extension.log(`Found file ${bibPath}`);
+      if (this.bibWatcher === undefined) {
+        this.extension.log(`Creating file watcher for files.`);
+        this.bibWatcher = chokidar.watch(bibPath, { awaitWriteFinish: true });
+        this.bibWatcher.on("change", (filePath: string) => {
+          this.extension.log(
+            `Bib file watcher - responding to change in ${filePath}`
+          );
+          this.extension.completer.citation.parseBibFile(filePath);
+        });
+        this.bibWatcher.on("unlink", (filePath: string) => {
+          this.extension.log(`Bib file watcher: ${filePath} deleted.`);
+          this.extension.completer.citation.forgetParsedBibItems(filePath);
+          this.bibWatcher.unwatch(filePath);
+          this.watched.splice(this.watched.indexOf(filePath), 1);
+        });
+        this.extension.completer.citation.parseBibFile(bibPath);
+      } else if (this.watched.indexOf(bibPath) < 0) {
+        this.extension.log(`Adding file ${bibPath} to bib file watcher.`);
+        this.bibWatcher.add(bibPath);
+        this.watched.push(bibPath);
+        this.extension.completer.citation.parseBibFile(bibPath);
+      } else {
+        this.extension.log(`bib file ${bibPath} is already being watched.`);
+      }
+    }
+  }
+
+  forgetUnusedFiles(filesToForget: string[]) {
+    for (let i in filesToForget) {
+      let filePath = filesToForget[i];
+      this.extension.log(`Forget unused bib file: ${filePath}`);
+      this.extension.completer.citation.forgetParsedBibItems(filePath);
+      this.bibWatcher.unwatch(filePath);
+      this.watched.splice(this.watched.indexOf(filePath), 1);
+    }
+    return;
+  }
 }
