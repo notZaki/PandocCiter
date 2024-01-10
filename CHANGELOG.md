@@ -1,5 +1,10 @@
 # Change Log
 
+## [0.10.4] - 2024-01-09
+
+- Add support for table-style listings (PR #44 - thanks to @cochaviz)
+- Fix inconsistent behavior for relative paths when bib file is not enclosed in square brackets (issue #49)
+
 ## [0.10.3] - 2023-07-27
 
 - Citations entered from bibjson will have an editor and a clickable url/DOI on hover (PR #43 - thanks to @adunning)
