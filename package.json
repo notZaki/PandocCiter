@@ -6,7 +6,7 @@
   "publisher": "notZaki",
   "license": "MIT",
   "engines": {
-    "vscode": "^1.78.1"
+    "vscode": "^1.85.0"
   },
   "icon": "icon.png",
   "homepage": "https://github.com/notZaki/PandocCiter",
