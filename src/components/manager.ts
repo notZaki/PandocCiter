@@ -71,7 +71,7 @@ export class Manager {
             const bibFiles = (bibInYaml instanceof Array ? bibInYaml : [bibInYaml]);
             for (let i in bibFiles) {
                 let bibFile = this.stripQuotes(bibFiles[i]);
-                bibFile = this.resolveBibFile(bibFile, rootFolder);
+                bibFile = this.resolveBibFile(bibFile, undefined);
                 this.extension.log(`Looking for file: ${bibFile}`);
                 this.addBibToWatcher(bibFile);
                 foundFiles.push(bibFile);
