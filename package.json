@@ -115,7 +115,7 @@
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
-    "test": "npm run compile && node ./node_modules/vscode/bin/test"
+    "test": "npm run compile && vscode-test"
   },
   "dependencies": {
     "chokidar": "^3.5.3",
@@ -123,9 +123,13 @@
     "js-yaml": "^4"
   },
   "devDependencies": {
+    "@types/mocha": "^10.0.10",
     "@types/node": "^20.10.8",
+    "@types/vscode": "^1.85.0",
+    "@vscode/test-cli": "^0.0.11",
+    "@vscode/test-electron": "^2.5.2",
     "eslint": "^8.56.0",
-    "typescript": "^5.3.3",
-    "@types/vscode": "^1.85.0"
+    "mocha": "^11.7.4",
+    "typescript": "^5.3.3"
   }
 }
