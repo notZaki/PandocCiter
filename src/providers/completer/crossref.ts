@@ -59,7 +59,7 @@ export class Crossref {
 
   private parseFig(ctx: ParseContext): vscode.CompletionItem {
     let match = this.regexes.fig.exec(ctx.lineMatch.toString());
-    if (!match) return null;
+    if (!match) { return null; }
     const title = match[1];
     const documentation = new vscode.MarkdownString(
       `![](${join(dirname(ctx.doc.fileName), match[2])}|"width=300")`
@@ -74,7 +74,7 @@ export class Crossref {
 
   private parseSec(ctx: ParseContext): vscode.CompletionItem {
     let match = this.regexes.sec.exec(ctx.lineMatch.toString());
-    if (!match) return null;
+    if (!match) { return null; }
     const title = match[1];
     return {
       label: `${ctx.type}:${ctx.label}`,
@@ -85,7 +85,7 @@ export class Crossref {
 
   private parseTbl(ctx: ParseContext): vscode.CompletionItem {
     let match = this.regexes.tbl.exec(ctx.lineMatch.toString());
-    if (!match) return null;
+    if (!match) { return null; }
     const title = match[1];
     let documentation = new vscode.MarkdownString("");
     const doc = ctx.doc.getText();
@@ -99,8 +99,8 @@ export class Crossref {
       // +2 = with header & splitter
       for (let i = 0; i < tblPrintLines + 2; i++) {
         const pos = doc.indexOf("\n", cursor + 1);
-        if (pos < 0) break;
-        else cursor = pos;
+        if (pos < 0) { break; }
+        else { cursor = pos; }
       }
       documentation = new vscode.MarkdownString(
         doc.substring(begin + 2, cursor)
@@ -166,8 +166,8 @@ export class Crossref {
       // +2 = with header & splitter
       for (let i = 0; i < tblPrintLines + 2; i++) {
         const pos = doc.indexOf("\n", cursor + 1);
-        if (pos < 0) break;
-        else cursor = pos;
+        if (pos < 0) { break; }
+        else { cursor = pos; }
       }
       documentation = new vscode.MarkdownString(
         doc.substring(begin + 2, cursor)
@@ -196,7 +196,7 @@ export class Crossref {
 
   private parseEq(ctx: ParseContext): vscode.CompletionItem {
     let match = this.regexes.eq.exec(ctx.lineMatch.toString());
-    if (!match) return null;
+    if (!match) { return null; }
     const doc = ctx.doc.getText();
     const matchIndex = ctx.lineMatch.index + match.index;
     const searchStart = Math.max(matchIndex - foreSearchChars, 0);
@@ -220,7 +220,7 @@ export class Crossref {
     const mode: string = vscode.workspace
       .getConfiguration("PandocCiter")
       .get("CrossRefMode", "full");
-    if (mode === "none") return [];
+    if (mode === "none") { return []; }
 
     const targets = [];
     let match: RegExpExecArray | null;

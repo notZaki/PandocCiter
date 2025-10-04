@@ -135,9 +135,9 @@ export class Citation {
 
   parseBibFile(file: string) {
     const ext = path.extname(file);
-    if (ext == ".bib") {
+    if (ext === ".bib") {
       this.parseBibtexFile(file);
-    } else if (ext == ".json") {
+    } else if (ext === ".json") {
       this.parseBibjsonFile(file);
     } else {
       this.extension.log(`Unknown file extension force: ${file}`);
