@@ -62,6 +62,9 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     vscode.languages.registerDefinitionProvider(selector, extension.definition)
   );
+
+  // Export the extension instance for test access
+  return extension;
 }
 
 export class Extension {
