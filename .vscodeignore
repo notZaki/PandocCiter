@@ -5,4 +5,4 @@ out/**/*.map
 src/**
 .gitignore
 vsc-extension-quickstart.md
-tslint.json
+eslint.config.mjs
