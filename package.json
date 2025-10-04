@@ -115,17 +115,20 @@
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
-    "test": "npm run compile && node ./node_modules/vscode/bin/test"
+    "test": "npm run compile && node ./node_modules/vscode/bin/test",
+    "lint": "eslint"
   },
   "dependencies": {
     "chokidar": "^3.5.3",
-    "latex-utensils": "^6.2.0",
-    "js-yaml": "^4"
+    "js-yaml": "^4",
+    "latex-utensils": "^6.2.0"
   },
   "devDependencies": {
     "@types/node": "^20.10.8",
-    "eslint": "^8.56.0",
-    "typescript": "^5.3.3",
-    "@types/vscode": "^1.85.0"
+    "@types/vscode": "^1.85.0",
+    "@typescript-eslint/eslint-plugin": "^8.45.0",
+    "@typescript-eslint/parser": "^8.45.0",
+    "eslint": "^8.57.1",
+    "typescript": "^5.3.3"
   }
 }
