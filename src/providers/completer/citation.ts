@@ -54,13 +54,21 @@ export class Citation {
   }): vscode.CompletionItem[] {
     // Compile the suggestion array to vscode completion array
     return this.updateAll().map((item) => {
-      item.filterText = Object.values(item.fields).join(" ");
+      // Include the cite key itself in the filter text so users can search
+      // by any fragment of the key, not only by the fields.
+      item.filterText =
+        item.key + " " + Object.values(item.fields).join(" ");
       item.insertText = item.key;
       if (args) {
-        item.range = args.document.getWordRangeAtPosition(
+        // Right after the trigger `@` there is no word yet, so
+        // getWordRangeAtPosition returns undefined. Fall back to an empty
+        // range at the cursor so VS Code knows the replacement anchor.
+        const wordRange = args.document.getWordRangeAtPosition(
           args.position,
           /[-a-zA-Z0-9_:.]+/
         );
+        item.range =
+          wordRange ?? new vscode.Range(args.position, args.position);
       }
       return item;
     });
