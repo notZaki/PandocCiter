@@ -60,8 +60,10 @@ export class Manager {
         let bibFile = this.stripQuotes(bibFiles[i]);
         bibFile = this.resolveBibFile(bibFile, undefined, sourceDocument);
         this.extension.log(`Looking for .bib file: ${bibFile}`);
-        this.addBibToWatcher(bibFile);
-        foundFiles.push(bibFile);
+        const foundFile = this.addBibToWatcher(bibFile);
+        if (foundFile) {
+          foundFiles.push(foundFile);
+        }
       }
     }
 
@@ -72,42 +74,51 @@ export class Manager {
       docURI
     );
     const rootFolder = vscode.workspace.getWorkspaceFolder(docURI)?.uri.fsPath;
-    const yamltext = activeText.match(/---\r?\n((.+\r?\n)+)---/gm);
-    const parsedyaml = yaml.loadAll(yamltext)[0];
-    if (parsedyaml && parsedyaml.bibliography) {
-      const bibInYaml = yaml.loadAll(yamltext)[0].bibliography;
-      const bibFiles = bibInYaml instanceof Array ? bibInYaml : [bibInYaml];
-      for (let i in bibFiles) {
-        let bibFile = this.stripQuotes(bibFiles[i]);
-        bibFile = this.resolveBibFile(bibFile, undefined, sourceDocument);
-        this.extension.log(`Looking for file: ${bibFile}`);
-        this.addBibToWatcher(bibFile);
-        foundFiles.push(bibFile);
+    const bibFilesFromYaml = this.getBibliographyFiles(activeText);
+    for (let i in bibFilesFromYaml) {
+      let bibFile = this.stripQuotes(bibFilesFromYaml[i]);
+      bibFile = this.resolveBibFile(bibFile, undefined, sourceDocument);
+      this.extension.log(`Looking for file: ${bibFile}`);
+      const foundFile = this.addBibToWatcher(bibFile);
+      if (foundFile) {
+        foundFiles.push(foundFile);
       }
     }
     const rootfile: string = configuration.get("RootFile");
     if (rootfile !== "") {
-      let curInput = path.join(rootfile);
-      if (!path.isAbsolute(curInput) && rootFolder) {
-        curInput = path.join(rootFolder, rootfile);
-      }
-      const rootText = fs.readFileSync(curInput, "utf8");
-      const bibInYaml = yaml.loadAll(rootText)[0].bibliography;
-      const bibFiles = bibInYaml instanceof Array ? bibInYaml : [bibInYaml];
-      for (let i in bibFiles) {
-        let bibFile = path.join(path.dirname(curInput), bibFiles[i]);
-        bibFile = this.resolveBibFile(bibFile, rootFolder, sourceDocument);
-        this.extension.log(`Looking for file: ${bibFile}`);
-        this.addBibToWatcher(bibFile);
-        foundFiles.push(bibFile);
+      try {
+        let curInput = path.join(rootfile);
+        if (!path.isAbsolute(curInput) && rootFolder) {
+          curInput = path.join(rootFolder, rootfile);
+        }
+        const rootText = fs.readFileSync(curInput, "utf8");
+        const bibFiles = this.getBibliographyFiles(rootText);
+        for (let i in bibFiles) {
+          let bibFile = bibFiles[i];
+          if (!path.isAbsolute(bibFile)) {
+            bibFile = path.join(path.dirname(curInput), bibFile);
+          }
+          bibFile = this.resolveBibFile(bibFile, rootFolder, sourceDocument);
+          this.extension.log(`Looking for file: ${bibFile}`);
+          const foundFile = this.addBibToWatcher(bibFile);
+          if (foundFile) {
+            foundFiles.push(foundFile);
+          }
+        }
+      } catch (error) {
+        this.extension.log(
+          `Failed to read root file ${rootfile}: ${this.getErrorMessage(error)}`
+        );
       }
     }
     if (configuration.get("UseDefaultBib") && configuration.get("DefaultBib")) {
       let bibFile = path.join(configuration.get("DefaultBib"));
       bibFile = this.resolveBibFile(bibFile, rootFolder, sourceDocument);
       this.extension.log(`Looking for file: ${bibFile}`);
-      this.addBibToWatcher(bibFile);
-      foundFiles.push(bibFile);
+      const foundFile = this.addBibToWatcher(bibFile);
+      if (foundFile) {
+        foundFiles.push(foundFile);
+      }
     }
     if (
       configuration.get("UseDefaultBib") &&
@@ -121,8 +132,10 @@ export class Manager {
           sourceDocument
         );
         this.extension.log(`Looking for file: ${bibFile}`);
-        this.addBibToWatcher(bibFile);
-        foundFiles.push(bibFile);
+        const foundFile = this.addBibToWatcher(bibFile);
+        if (foundFile) {
+          foundFiles.push(foundFile);
+        }
       });
     }
     let watched_but_not_found = this.watched.filter(
@@ -161,7 +174,37 @@ export class Manager {
     }
   }
 
-  addBibToWatcher(bibPath: string) {
+  getBibliographyFiles(text: string): string[] {
+    const frontMatter = text.match(
+      /^\uFEFF?---[ \t]*\r?\n([\s\S]*?)\r?\n---[ \t]*(?:\r?\n|$)/
+    );
+    if (!frontMatter) {
+      return [];
+    }
+
+    try {
+      const parsedYaml = yaml.load(frontMatter[1]) as {
+        bibliography?: string | string[];
+      };
+      if (!parsedYaml || !parsedYaml.bibliography) {
+        return [];
+      }
+      return parsedYaml.bibliography instanceof Array
+        ? parsedYaml.bibliography
+        : [parsedYaml.bibliography];
+    } catch (error) {
+      this.extension.log(
+        `Failed to parse YAML front matter: ${this.getErrorMessage(error)}`
+      );
+      return [];
+    }
+  }
+
+  getErrorMessage(error: unknown): string {
+    return error instanceof Error ? error.message : String(error);
+  }
+
+  addBibToWatcher(bibPath: string): string | undefined {
     if (!fs.existsSync(bibPath) && fs.existsSync(bibPath + ".json")) {
       bibPath += ".json";
     }
@@ -177,7 +220,7 @@ export class Manager {
           this.extension.log(
             `Bib file watcher - responding to change in ${filePath}`
           );
-          this.extension.completer.citation.parseBibFile(filePath);
+          this.parseBibFile(filePath);
         });
         this.bibWatcher.on("unlink", (filePath: string) => {
           this.extension.log(`Bib file watcher: ${filePath} deleted.`);
@@ -185,15 +228,29 @@ export class Manager {
           this.bibWatcher.unwatch(filePath);
           this.watched.splice(this.watched.indexOf(filePath), 1);
         });
-        this.extension.completer.citation.parseBibFile(bibPath);
+        this.watched.push(bibPath);
+        this.parseBibFile(bibPath);
       } else if (this.watched.indexOf(bibPath) < 0) {
         this.extension.log(`Adding file ${bibPath} to bib file watcher.`);
         this.bibWatcher.add(bibPath);
         this.watched.push(bibPath);
-        this.extension.completer.citation.parseBibFile(bibPath);
+        this.parseBibFile(bibPath);
       } else {
         this.extension.log(`bib file ${bibPath} is already being watched.`);
       }
+      return bibPath;
+    }
+    return undefined;
+  }
+
+  parseBibFile(filePath: string) {
+    try {
+      this.extension.completer.citation.parseBibFile(filePath);
+    } catch (error) {
+      this.extension.completer.citation.forgetParsedBibItems(filePath);
+      this.extension.log(
+        `Failed to parse bibliography file ${filePath}: ${this.getErrorMessage(error)}`
+      );
     }
   }
 
