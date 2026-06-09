@@ -6,7 +6,7 @@
   "publisher": "notZaki",
   "license": "MIT",
   "engines": {
-    "vscode": "^1.85.0"
+    "vscode": "^1.120.0"
   },
   "icon": "icon.png",
   "homepage": "https://github.com/notZaki/PandocCiter",
@@ -115,17 +115,17 @@
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
-    "test": "npm run compile && node ./node_modules/vscode/bin/test"
+    "test": "npm run compile"
   },
   "dependencies": {
-    "chokidar": "^3.5.3",
-    "latex-utensils": "^6.2.0",
-    "js-yaml": "^4"
+    "chokidar": "^4.0.3",
+    "js-yaml": "^4.2.0",
+    "latex-utensils": "^7.0.0"
   },
   "devDependencies": {
-    "@types/node": "^20.10.8",
-    "eslint": "^8.56.0",
-    "typescript": "^5.3.3",
-    "@types/vscode": "^1.85.0"
+    "@types/node": "^22.19.20",
+    "@types/vscode": "^1.120.0",
+    "eslint": "^9.39.4",
+    "typescript": "^5.9.3"
   }
 }
