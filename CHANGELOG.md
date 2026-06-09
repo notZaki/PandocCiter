@@ -1,5 +1,11 @@
 # Change Log
 
+## [0.11.0] - 2026-06-08
+
+- Autocomplete suggestions now filter by key and field substrings (PR #53 and #62 - thanks to @niekvandepas and @JLCucumber)
+- Added a new activation event to try fix suggestions not showing up when the extension is first installed
+- Broadened completion support and tried to improve handling of invalid files
+
 ## [0.10.4] - 2024-01-09
 
 - Add support for table-style listings (PR #44 - thanks to @cochaviz)
