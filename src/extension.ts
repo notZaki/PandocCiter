@@ -7,14 +7,16 @@ import { Completer } from "./providers/completion";
 import { HoverProvider } from "./providers/hover";
 import { DefinitionProvider } from "./providers/definition";
 
+const supportedLanguages = ["markdown", "rmd", "pweave_md", "quarto"];
+
 export function activate(context: vscode.ExtensionContext) {
   const extension = new Extension();
 
   context.subscriptions.push(
-    vscode.workspace.onDidOpenTextDocument(() => {
+    vscode.workspace.onDidOpenTextDocument((document) => {
       extension.log("Reacting to document open");
-      if (vscode.window.activeTextEditor) {
-        extension.manager.findBib();
+      if (supportedLanguages.includes(document.languageId)) {
+        extension.manager.findBib(document);
       }
     })
   );
@@ -24,20 +26,20 @@ export function activate(context: vscode.ExtensionContext) {
       extension.log("Reacting to active document change");
       if (
         vscode.window.activeTextEditor &&
-        ["markdown", "rmd", "pweave_md"].includes(
+        supportedLanguages.includes(
           vscode.window.activeTextEditor.document.languageId
         )
       ) {
-        extension.manager.findBib();
+        extension.manager.findBib(vscode.window.activeTextEditor.document);
       }
     })
   );
 
   context.subscriptions.push(
-    vscode.workspace.onDidSaveTextDocument(() => {
+    vscode.workspace.onDidSaveTextDocument((document) => {
       extension.log("Reacting to document save");
-      if (vscode.window.activeTextEditor) {
-        extension.manager.findBib();
+      if (supportedLanguages.includes(document.languageId)) {
+        extension.manager.findBib(document);
       }
     })
   );
@@ -48,7 +50,6 @@ export function activate(context: vscode.ExtensionContext) {
     }
   );
 
-  extension.manager.findBib();
   context.subscriptions.push(
     vscode.languages.registerCompletionItemProvider(
       selector,
@@ -62,6 +63,8 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     vscode.languages.registerDefinitionProvider(selector, extension.definition)
   );
+
+  extension.manager.findBib();
 }
 
 export class Extension {

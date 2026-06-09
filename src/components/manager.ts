@@ -42,9 +42,14 @@ export class Manager {
     this.watched = [];
   }
 
-  findBib(): void {
+  findBib(sourceDocument = vscode.window.activeTextEditor?.document): void {
+    if (!sourceDocument) {
+      this.extension.log("Skipping bibliography discovery: no active document.");
+      return;
+    }
+
     let foundFiles: string[] = [];
-    const activeText = vscode.window.activeTextEditor!.document.getText();
+    const activeText = sourceDocument.getText();
 
     // Re-use the old reg-ex approach in case the yaml parser fails
     const bibRegex = /^bibliography:\s* \[(.*)\]/m;
@@ -53,7 +58,7 @@ export class Manager {
       const bibFiles = bibresult[1].split(",").map((item) => item.trim());
       for (let i in bibFiles) {
         let bibFile = this.stripQuotes(bibFiles[i]);
-        bibFile = this.resolveBibFile(bibFile, undefined);
+        bibFile = this.resolveBibFile(bibFile, undefined, sourceDocument);
         this.extension.log(`Looking for .bib file: ${bibFile}`);
         this.addBibToWatcher(bibFile);
         foundFiles.push(bibFile);
@@ -61,7 +66,7 @@ export class Manager {
     }
 
     // This is the newer approach using yaml-js
-    const docURI = vscode.window.activeTextEditor!.document.uri;
+    const docURI = sourceDocument.uri;
     const configuration = vscode.workspace.getConfiguration(
       "PandocCiter",
       docURI
@@ -74,7 +79,7 @@ export class Manager {
       const bibFiles = bibInYaml instanceof Array ? bibInYaml : [bibInYaml];
       for (let i in bibFiles) {
         let bibFile = this.stripQuotes(bibFiles[i]);
-        bibFile = this.resolveBibFile(bibFile, undefined);
+        bibFile = this.resolveBibFile(bibFile, undefined, sourceDocument);
         this.extension.log(`Looking for file: ${bibFile}`);
         this.addBibToWatcher(bibFile);
         foundFiles.push(bibFile);
@@ -91,7 +96,7 @@ export class Manager {
       const bibFiles = bibInYaml instanceof Array ? bibInYaml : [bibInYaml];
       for (let i in bibFiles) {
         let bibFile = path.join(path.dirname(curInput), bibFiles[i]);
-        bibFile = this.resolveBibFile(bibFile, rootFolder);
+        bibFile = this.resolveBibFile(bibFile, rootFolder, sourceDocument);
         this.extension.log(`Looking for file: ${bibFile}`);
         this.addBibToWatcher(bibFile);
         foundFiles.push(bibFile);
@@ -99,7 +104,7 @@ export class Manager {
     }
     if (configuration.get("UseDefaultBib") && configuration.get("DefaultBib")) {
       let bibFile = path.join(configuration.get("DefaultBib"));
-      bibFile = this.resolveBibFile(bibFile, rootFolder);
+      bibFile = this.resolveBibFile(bibFile, rootFolder, sourceDocument);
       this.extension.log(`Looking for file: ${bibFile}`);
       this.addBibToWatcher(bibFile);
       foundFiles.push(bibFile);
@@ -110,7 +115,11 @@ export class Manager {
     ) {
       let bibFiles: string[] = configuration.get("DefaultBibs");
       bibFiles.forEach((element) => {
-        let bibFile = this.resolveBibFile(path.join(element), rootFolder);
+        let bibFile = this.resolveBibFile(
+          path.join(element),
+          rootFolder,
+          sourceDocument
+        );
         this.extension.log(`Looking for file: ${bibFile}`);
         this.addBibToWatcher(bibFile);
         foundFiles.push(bibFile);
@@ -138,16 +147,17 @@ export class Manager {
     }
   }
 
-  resolveBibFile(bibFile: string, rootFolder: string) {
+  resolveBibFile(
+    bibFile: string,
+    rootFolder: string | undefined,
+    sourceDocument: vscode.TextDocument
+  ) {
     if (path.isAbsolute(bibFile)) {
       return bibFile;
     } else if (rootFolder) {
       return path.resolve(path.join(rootFolder, bibFile));
     } else {
-      return path.resolve(
-        path.dirname(vscode.window.activeTextEditor!.document.fileName),
-        bibFile
-      );
+      return path.resolve(path.dirname(sourceDocument.fileName), bibFile);
     }
   }
 
