@@ -44,6 +44,36 @@ export function activate(context: vscode.ExtensionContext) {
     })
   );
 
+  context.subscriptions.push(
+    vscode.workspace.onDidChangeTextDocument((event) => {
+      const editor = vscode.window.activeTextEditor;
+      if (
+        !editor ||
+        editor.document !== event.document ||
+        !supportedLanguages.includes(event.document.languageId)
+      ) {
+        return;
+      }
+      const shouldRetrigger = event.contentChanges.some(
+        (change) => {
+          if (change.text !== "" || change.rangeLength === 0) {
+            return false;
+          }
+          const linePrefix = event.document
+            .lineAt(change.range.start.line)
+            .text.substring(0, change.range.start.character);
+          return /(?:^|[ ;\[-])@$/.test(linePrefix);
+        }
+      );
+      if (shouldRetrigger) {
+        setTimeout(
+          () => vscode.commands.executeCommand("editor.action.triggerSuggest"),
+          0
+        );
+      }
+    })
+  );
+
   const selector = supportedLanguages;
 
   context.subscriptions.push(
