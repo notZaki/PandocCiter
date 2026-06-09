@@ -57,10 +57,15 @@ export class Citation {
       item.filterText = [item.key, ...Object.values(item.fields)].join(" ");
       item.insertText = item.key;
       if (args) {
-        item.range = args.document.getWordRangeAtPosition(
+        // Right after the trigger `@` there is no word yet, so
+        // getWordRangeAtPosition returns undefined. Fall back to an empty
+        // range at the cursor so VS Code knows the replacement anchor.
+        const wordRange = args.document.getWordRangeAtPosition(
           args.position,
           /[-a-zA-Z0-9_:.]+/
         );
+        item.range =
+          wordRange ?? new vscode.Range(args.position, args.position);
       }
       return item;
     });
