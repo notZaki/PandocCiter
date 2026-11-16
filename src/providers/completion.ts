@@ -57,7 +57,7 @@ export class Completer implements vscode.CompletionItemProvider {
       .split(" ");
     const trigger = line[line.length - 1];
     const suggestions = this.completion(trigger, document, position).concat(
-      this.completionCrossref(trigger, document)
+      this.completionCrossref(trigger, document, position)
     );
     this.extension.log(`Showing ${suggestions.length} suggestions`);
     if (suggestions.length > 0) {
@@ -124,8 +124,23 @@ export class Completer implements vscode.CompletionItemProvider {
 
   completionCrossref(
     line: string,
-    doc: vscode.TextDocument
+    doc: vscode.TextDocument,
+    position?: vscode.Position
   ): vscode.CompletionItem[] {
-    return this.crossref.provide({ document: doc });
+    const items = this.crossref.provide({ document: doc });
+    if (position) {
+      // Replace the whole label typed so far (e.g. `fig:sa`), as for
+      // citations: the default word range stops at `:` and `-`, so accepting
+      // `fig:sat` after `@fig:sa` gave `@fig:fig:sat`.
+      const wordRange = doc.getWordRangeAtPosition(
+        position,
+        /[-a-zA-Z0-9_:.]+/
+      );
+      const range = wordRange ?? new vscode.Range(position, position);
+      for (const item of items) {
+        item.range = range;
+      }
+    }
+    return items;
   }
 }
