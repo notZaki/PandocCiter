@@ -20,22 +20,93 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import { dirname, join } from "path";
+import { basename, dirname, join } from "path";
 import * as vscode from "vscode";
 import { Extension } from "../../extension";
 
 const foreSearchChars = 800;
 const tblPrintLines = 3;
 
+// The text a label is read from: the current document or another file
+// matched by PandocCiter.CrossRefFiles.
+interface LabelSource {
+  fileName: string;
+  getText(): string;
+}
+
 interface ParseContext {
   lineMatch: RegExpExecArray;
   type: string;
   label: string;
-  doc: vscode.TextDocument;
+  doc: LabelSource;
+}
+
+// Texts of the files matched by the PandocCiter.CrossRefFiles glob patterns,
+// read once and kept up to date by file system watchers.
+class LabelFiles {
+  private texts = new Map<string, string>();
+  private watchers: vscode.FileSystemWatcher[] = [];
+
+  constructor() {
+    this.reload();
+    vscode.workspace.onDidChangeConfiguration((e) => {
+      if (e.affectsConfiguration("PandocCiter.CrossRefFiles")) {
+        this.reload();
+      }
+    });
+  }
+
+  private async reload() {
+    this.watchers.forEach((w) => w.dispose());
+    this.watchers = [];
+    this.texts.clear();
+    const patterns: string[] = vscode.workspace
+      .getConfiguration("PandocCiter")
+      .get("CrossRefFiles", []);
+    for (const pattern of patterns) {
+      const watcher = vscode.workspace.createFileSystemWatcher(pattern);
+      watcher.onDidCreate((uri) => this.read(uri));
+      watcher.onDidChange((uri) => this.read(uri));
+      watcher.onDidDelete((uri) => this.texts.delete(uri.fsPath));
+      this.watchers.push(watcher);
+      const uris = await vscode.workspace.findFiles(
+        pattern,
+        "**/node_modules/**"
+      );
+      await Promise.all(uris.map((uri) => this.read(uri)));
+    }
+  }
+
+  private async read(uri: vscode.Uri) {
+    try {
+      const data = await vscode.workspace.fs.readFile(uri);
+      this.texts.set(uri.fsPath, Buffer.from(data).toString("utf8"));
+    } catch {
+      this.texts.delete(uri.fsPath);
+    }
+  }
+
+  // The matched files other than `current`; an open file is read from its
+  // editor, so unsaved labels are included.
+  others(current: vscode.TextDocument): LabelSource[] {
+    const sources: LabelSource[] = [];
+    for (const [fileName, text] of this.texts) {
+      if (fileName === current.fileName) continue;
+      const open = vscode.workspace.textDocuments.find(
+        (d) => d.fileName === fileName
+      );
+      sources.push({
+        fileName,
+        getText: () => (open ? open.getText() : text),
+      });
+    }
+    return sources;
+  }
 }
 
 export class Crossref {
   extension: Extension;
+  files: LabelFiles;
   lineRegex: RegExp;
   regexes: {
     fig: RegExp;
@@ -47,6 +118,7 @@ export class Crossref {
 
   constructor(extension: Extension) {
     this.extension = extension;
+    this.files = new LabelFiles();
     this.lineRegex = /.*\{.*#(fig|tbl|eq|sec|lst):(\w+).*\}.*/g;
     this.regexes = {
       fig: /!\[(.*)\]\((.+)\)\{/,
@@ -231,30 +303,43 @@ export class Crossref {
       lst: this.parseLst.bind(this),
       eq: this.parseEq.bind(this),
     };
-    while ((match = this.lineRegex.exec(args.document.getText())) !== null) {
-      const type = match[1];
-      const label = match[2];
-      switch (mode) {
-        case "full":
-          const parser = parsers[type];
-          if (parser) {
-            let item = parser({
-              lineMatch: match,
-              type,
-              label,
-              doc: args.document,
-            });
-            if (item) {
-              targets.push(item);
+    const sources: LabelSource[] = [
+      args.document,
+      ...this.files.others(args.document),
+    ];
+    for (const source of sources) {
+      const text = source.getText();
+      const other = source !== args.document;
+      this.lineRegex.lastIndex = 0;
+      while ((match = this.lineRegex.exec(text)) !== null) {
+        const type = match[1];
+        const label = match[2];
+        switch (mode) {
+          case "full":
+            const parser = parsers[type];
+            if (parser) {
+              let item = parser({
+                lineMatch: match,
+                type,
+                label,
+                doc: source,
+              });
+              if (item) {
+                if (other) {
+                  item.detail = `${item.detail ?? ""} (${basename(source.fileName)})`;
+                }
+                targets.push(item);
+              }
             }
-          }
-          break;
-        case "minimal":
-          targets.push({
-            label: `${match[1]}:${match[2]}`,
-            kind: vscode.CompletionItemKind.Reference,
-          });
-          break;
+            break;
+          case "minimal":
+            targets.push({
+              label: `${match[1]}:${match[2]}`,
+              detail: other ? basename(source.fileName) : undefined,
+              kind: vscode.CompletionItemKind.Reference,
+            });
+            break;
+        }
       }
     }
     return targets;

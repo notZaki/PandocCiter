@@ -25,6 +25,9 @@ This extension provides autocompletion of citations stored in a bibtex file, for
 - `PandocCiter.CrossRefMode`
     + Type: String, either "full" (default), "minimal", or "none"
     + Function: This changes the detail shown during auto-completion of cross-references. Setting this to "none" will disable auto-completion of pandoc-crossref references.
+- `PandocCiter.CrossRefFiles`
+    + Type: Array of Strings, glob patterns relative to the workspace folder, e.g. `["**/*.md"]`
+    + Function: Cross-reference labels defined in these files are suggested too, so a document split into several files (chapters) can reference a figure, table, equation or section defined in another one. The file a label comes from is shown next to it. By default, only the labels of the current document are suggested.
 - `PandocCiter.ViewType`
     + Type: String, either "inline" (default) or "browser"
     + Function: Changes how the suggested citations are shown
