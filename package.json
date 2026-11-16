@@ -99,6 +99,14 @@
           ],
           "description": "List of fields displayed in preview"
         },
+        "PandocCiter.CrossRefFiles": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "Glob patterns, relative to the workspace folder, of other Markdown files whose pandoc-crossref labels are also suggested, e.g. [\"**/*.md\"] for a document split into several files"
+        },
         "PandocCiter.CrossRefMode": {
           "type": "string",
           "default": "full",
