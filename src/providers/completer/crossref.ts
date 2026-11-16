@@ -47,7 +47,8 @@ export class Crossref {
 
   constructor(extension: Extension) {
     this.extension = extension;
-    this.lineRegex = /.*\{.*#(fig|tbl|eq|sec|lst):(\w+).*\}.*/g;
+    // A label may contain - . and : (pandoc identifiers), e.g. fig:sat-vs-sst
+    this.lineRegex = /.*\{.*#(fig|tbl|eq|sec|lst):([\w.:-]*\w).*\}.*/g;
     this.regexes = {
       fig: /!\[(.*)\]\((.+)\)\{/,
       eq: /\$\$\s*\{/,
